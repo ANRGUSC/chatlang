@@ -1,0 +1,33 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Video file, mp4, audio
+*.rgb
+*.wav
+*.mp4
+*.csv
+*.json
+
+# PDF file
+*.pdf
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# env file:
+OPENAI_API_KEY

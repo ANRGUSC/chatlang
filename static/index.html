@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Chat Language Learning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/indexstyle.css">
+<script type="text/javascript" src="js/main.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+   <!-- Here are the two chat windows with separate user input box right below each chat window -->
+   <div class="chat-box-container">
+      <div class="window">
+         <div class="chat-box" id="chatBox1"></div>
+         <div class="user-input">
+            <input type="text" id="inputBox1" placeholder="Enter message for Chat Box 1" onkeypress="checkSubmit(event, 1)">
+            <button onclick="sendMessage(1)">Send</button>
+         </div>
+      </div>
+      <div class="window">
+         <div class="chat-box" id="chatBox2"></div>
+         <div class="user-input">
+            <input type="text" id="inputBox2" placeholder="Enter message for Chat Box 2" onkeypress="checkSubmit(event, 2)">
+            <button onclick="sendMessage(2)">Send</button>
+         </div>
+      </div>
+   </div>
+</body>
+</html>
