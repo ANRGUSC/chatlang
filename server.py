@@ -5,7 +5,7 @@ import openai
 import requests
 
 # Setup openai env:
-API_KEY = open("OPENAI_API_KEY", "r").read()
+API_KEY = open("OPENAI_API_KEY", "r").read().strip()
 openai.api_key = API_KEY
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ def get_meta_response():
     }
     data = {
         'model': 'gpt-3.5-turbo-0613',  # Can change this model later on
-        'messages': user_message
+        'messages': user_message,
     }
 
     # call openai api to get response:

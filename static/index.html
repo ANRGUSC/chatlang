@@ -3,25 +3,46 @@
 <head>
 <title>Chat Language Learning</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="css/indexstyle.css">
-<script type="text/javascript" src="js/main.js"></script>
+<link rel="stylesheet" href="/static/css/indexstyle.css">
+<script type="text/javascript" src="/static/js/main.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
+   <!-- This is the Prompt for user to enter role -->
+   <form class="config-container" onsubmit="return false">
+      <div class="config-input">
+         <input type="text" id="chat-context" placeholder="Enter scenario context" required>
+      </div>
+      <div class="config-input">
+         <input type="text" id="ai-role" placeholder="Enter assistant role" required>
+      </div>
+      <div class="config-input">
+         <input type="text" id="user-role" placeholder="Enter your role" required>
+      </div>
+      <div class="config-input">
+         <input type="text" id="chat-language" placeholder="Enter a language" required>
+      </div>
+      <button class="config-button" onclick="setupConfig()">Let's Go!</button>
+      <button class="config-button" onclick="resetConfig()">Restart</button>
+   </form>
+
+   <!--Loading sign-->
+   <div class="config-loading hidden">
+      <img id="loading-logo" src="/static/images/loading.gif">
+   </div>
+
    <!-- Here are the two chat windows with separate user input box right below each chat window -->
    <div class="chat-box-container">
       <div class="window">
          <div class="chat-box" id="chatBox1"></div>
          <div class="user-input">
-            <input type="text" id="inputBox1" placeholder="Enter message for Chat Box 1" onkeypress="checkSubmit(event, 1)">
-            <button onclick="sendMessage(1)">Send</button>
+            <input type="text" id="inputBox1" placeholder="Press enter to send message" onkeypress="enterMessage(event, 1)">
          </div>
       </div>
       <div class="window">
          <div class="chat-box" id="chatBox2"></div>
          <div class="user-input">
-            <input type="text" id="inputBox2" placeholder="Enter message for Chat Box 2" onkeypress="checkSubmit(event, 2)">
-            <button onclick="sendMessage(2)">Send</button>
+            <input type="text" id="inputBox2" placeholder="Press enter to send message" onkeypress="enterMessage(event, 2)">
          </div>
       </div>
    </div>
