@@ -36,7 +36,7 @@ def get_meta_response():
         'Content-Type': 'application/json'
     }
     data = {
-        'model': 'gpt-3.5-turbo-0613',  # Can change this model later on
+        'model': 'gpt-3.5-turbo',  # Can change this model later on
         'messages': user_message,
     }
 

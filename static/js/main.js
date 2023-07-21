@@ -2,21 +2,29 @@
 let prevLeftAssistantMessage = "";
 
 // Keep a log history:
-let leftLogSize = 6; // can change the size for cost consideration   (3 rounds of talk)
-let rightLogSize = 2; // can change the size for cost consideration  (1 round of talk)
 var leftChatLog = new Array();
 var rightChatLog = new Array();
 
 // System role content:
 let leftSystemConfig = "";
-let rightSystemConfig = "You are an assistant that acts like a language learning teacher.";
+let levelSuffix = "";
+let rightSystemConfig = "You're a language teacher. The user is your student and he/she will ask you various language-related questions based on the references possibly given. " +
+                        "Please provide concise and informative responses, keeping each reply simple, direct and not lengthy. Always keep your role and that of the user in mind.";
+let easySuffix = "Please provide short and simple replies, keeping each reply to only one sentence in entry level vocabulary and grammar."; 
+let moderateSuffix = "Please provide short replies, keeping each reply to only one sentence in intermediate level vocabulary and grammar.";   
+let expertSuffix = "Please provice concise and creative replies, keeping each reply to no more than three sentences in high-level vocabulary and grammar."; 
 
 // Record user role, environment, and assistant role:
 let userRole = "";
 let aiRole = "";
 let chatContext = "";
 let chatLanguage = "";
+let chatLevel = "";  // "Easy", "Moderate", or "Expert"
+let userSystemInput = "";
 var configClicked = false; // we only want take the first user click to the Let's Go button effective
+var updatedLeftMessage = false;  // false means: (1) did not get any assistant reply yet from the left window or (2) already updated this last left assistant reply in right window system message
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // When user click the "Let's Go!" button:
 function setupConfig() {
@@ -25,57 +33,44 @@ function setupConfig() {
    aiRole = normalizeString($("#ai-role").val());
    chatContext = $("#chat-context").val();
    chatLanguage = normalizeString($("#chat-language").val());
-
-   // Set up environment and user prefix for chat:
-   leftSystemConfig = "You are an assistant that acts like a/an " + aiRole + " in a/an " + chatLanguage + " " + chatContext + ".";
+   chatLevel = $("#chat-level").val();
+   userSystemInput = $("#system-context").val();
 
    // Send message to API and store the first two messages in left chat log:
-   if (!configClicked && userRole.replace(/\s/g, "") != "" && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" && chatLanguage.replace(/\s/g, "")) {
-      configClicked = true;
-      configChatLog();
-   }
-}
+   if (!configClicked && userRole.replace(/\s/g, "") != "" 
+      && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" 
+      && chatLanguage.replace(/\s/g, "") && chatLevel.replace(/\s/g, "") != "") {
+      // disable all input box once "Let's Go!" is clicked:
+      $("#user-role").prop("disabled", true);
+      $("#ai-role").prop("disabled", true);
+      $("#chat-context").prop("disabled", true);
+      $("#chat-language").prop("disabled", true);
+      $("#chat-level").prop("disabled", true);
+      $("#system-context").prop("disabled", true);
 
-// Send first message to API to take the AI into context, user won't see this message.
-function configChatLog() {
-   var messages = new Array();
-   messages.push({'role': 'system', 'content': leftSystemConfig});
-
-   // I am your {user role} at this {context}. Hello!
-   // After testing, this "Hello!" starter is the most stable input
-   let psedoInput = 'I am the ' + userRole + ' in this ' + chatLanguage + " " + chatContext + '. Hello!';
-   messages.push({'role': 'user', 'content': psedoInput});
-   let payload = {'messages': messages};
-
-   // Append this psedo input in the left chat log:
-   updateLeftLog(psedoInput);
-
-   // Send message to API, get response:
-   $.ajax({
-      beforeSend: function() {
-         // Show loading:
-         $(".config-loading").removeClass("hidden");
-      },
-      type: 'POST',
-      // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
-      url: 'http://localhost:5000/chatlanguagelearning/chat',  // for testing only
-      contentType: 'application/json',
-      data: JSON.stringify(payload),
-      success: function (response) {
-         var assistantReply = response.message;
-         // Add this new assistant message in the log history:
-         updateLeftLog(assistantReply);
-         
-         // Hide loading:
-         $(".config-loading").addClass("hidden");
-         
-         // Show the two chat windows:
-         $(".chat-box-container").css("visibility", "visible");
-      },
-      error: function (error) {
-         console.error('Error:', error);
+      // Set up environment and user prefix for chat:
+      // Left window system config:
+      leftSystemConfig = "You are the " + aiRole + " at this " + chatContext + ", " +
+         "and the user is the " + userRole + " at this " + chatContext + ". " +
+         "You and the user will have a conversation in " + chatLanguage + ". " +
+         "Please always keep in mind your and the user's roles in the above scenario";
+      if (userSystemInput.replace(/\s/g, "") != "") {
+         leftSystemConfig = leftSystemConfig + " " + userSystemInput;
       }
-   });
+
+      // Set level suffix:
+      if (chatLevel === "Easy") {
+         levelSuffix = easySuffix;
+      } else if (chatLevel === "Moderate") {
+         levelSuffix = moderateSuffix;
+      } else if (chatLevel === "Expert") {
+         levelSuffix = expertSuffix;
+      }
+      
+      // show chat windows:
+      configClicked = true;
+      $(".chat-box-container").css("visibility", "visible");
+   }
 }
 
 // Normalize user input to have first letter capitalized, and the rest all lower case:
@@ -93,25 +88,6 @@ function resetConfig() {
    window.location.reload();
 }
 
-// Update the left main conversation log history.
-// Always in the order: "user", "assistant", "user", "assistant"...
-function updateLeftLog(message) {
-   // If the array is already full, we are sure there will be at least two messages:
-   if (leftChatLog.length === leftLogSize) {
-      leftChatLog.splice(2, 2);  // always keep the first user & assistant message on record to have the chat take into context
-   }
-   leftChatLog.push(message);
-}
-
-// Update the right meta conversation log history.
-// Always in the order: "user", "assistant", "user", "assistant"...
-function updateRightLog(message) {
-   if (rightChatLog.length === rightLogSize) {
-      rightChatLog.splice(0, 2);
-   }
-   rightChatLog.push(message);
-}
-
 // Add user input message to chatbox:
 function addUserMessage(message, chatBoxNumber) {
    const chatBoxId = '#chatBox' + chatBoxNumber;
@@ -121,6 +97,9 @@ function addUserMessage(message, chatBoxNumber) {
       message = "Student: " + message;
    }
    $(chatBoxId).append(`<div class="message">${message}</div>`);
+
+   // Auto scroll to the bottom:
+   $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
 }
 
 // Add chatGPT's response to chatbox:
@@ -132,6 +111,23 @@ function addAssistantMessage(message, chatBoxNumber) {
       message = "Teacher: " + message;
    }
    $(chatBoxId).append(`<div class="message">${message}</div>`);
+   
+   // Auto scroll to the bottom:
+   $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
+}
+
+// Add system message.
+// caseNumber = 1 meaning its a system message, 2 meaning it should be centered as a notification:
+function addSystemMessage(message, caseNumber) {
+   const chatBoxId = '#chatBox2';
+   if (caseNumber == 1) {
+      $(chatBoxId).append(`<div class="system-message">${message}</div>`);
+   } else {
+      $(chatBoxId).append(`<div class="chat-box-header-message">${message}</div>`);
+   }
+
+   // Auto scroll to the bottom:
+   $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
 }
 
 // Enables the click/enter button function to input a message:
@@ -139,6 +135,15 @@ function enterMessage(event, chatBoxNumber) {
    if (event.keyCode === 13) {
       event.preventDefault();
       sendMessage(chatBoxNumber);
+   }
+}
+
+// Maintain the log history:
+function updateLog(chatBoxNumber, message) {
+   if (chatBoxNumber == 1) {
+      leftChatLog.push(message);
+   } else if (chatBoxNumber == 2) {
+      rightChatLog.push(message);
    }
 }
 
@@ -157,80 +162,126 @@ function sendMessage(chatBoxNumber) {
       return;
    }
 
-   // Add user message to chatbox:
-   addUserMessage(userInput, chatBoxNumber);
-
-   // Build the message from history log:
-   var messages = buildMessage(chatBoxNumber);   // get it from history log
-   if (chatBoxNumber == 1) {
-      messages.push({'role': 'user', 'content': userInput}); // add user input message
-   } else {
-      if (prevLeftAssistantMessage === "") {
-         messages.push({'role': 'user', 'content': userInput}); // add user input message
-      } else {
-         messages.push({'role': 'user', 'content': 'Take this as a reference: "' + prevLeftAssistantMessage + '", ' + userInput}); // take last assistant reply from left window as reference
-      }
-   }
-   let payload = {'messages': messages};
-
-   // console.log(JSON.stringify(payload));
-
-   // Add this new user input in the log history:
-   if (chatBoxNumber == 1) {
-      updateLeftLog(userInput);
-   } else {
-      updateRightLog(userInput);
-   }
-
-   // Execute ajax call:
-   $.ajax({
-      type: 'POST',
-      // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
-      url: 'http://localhost:5000/chatlanguagelearning/chat',  // for testing only
-      contentType: 'application/json',
-      data: JSON.stringify(payload),
-      success: function (response) {
-         var assistantReply = response.message;
-         addAssistantMessage(assistantReply, chatBoxNumber);
-         // Add this new assistant message in the log history:
-         if (chatBoxNumber == 1) {
-            updateLeftLog(assistantReply);
-            prevLeftAssistantMessage = assistantReply;   // update this value
+   // Check to see if on right window and message is a instruction message of "-help", "-level" or "system":
+   if (chatBoxNumber == 2 && userInput.startsWith("/")) {
+      if (userInput.startsWith("/help")) {
+         addSystemMessage("/level [level]:<br>&emsp;&emsp;&emsp;Change current level to [level]<br>&emsp;&emsp;&emsp;[level] must be Easy, Moderate, or Expert", 1);
+         addSystemMessage("/system [message]:<br>&emsp;&emsp;&emsp;Add instruction to chat bot<br>&emsp;&emsp;&emsp;e.g. You are upset./Start sentence with...", 1);
+      } else if (userInput.startsWith("/level")) {
+         // Get level:
+         var newLevel = userInput.substring(userInput.indexOf("/level ") + "/level ".length);
+         newLevel = newLevel.replace(/\s/g, "");   // remove all spaces
+         newLevel = normalizeString(newLevel);
+         if (newLevel === "Easy" || newLevel === "Moderate" || newLevel === "Expert") {
+            if (newLevel === chatLevel) {
+               addSystemMessage("---Level unchanged---", 2);
+            } else {
+               // Update select value to avoid confusion:
+               $("#chat-level").prop("disabled", false);
+               $("#chat-level").val(newLevel);
+               $("#chat-level").prop("disabled", true);
+               // Show message:
+               addSystemMessage("---Level changed from " + chatLevel + " to " + newLevel + "---", 2);
+               // Update chat level:
+               chatLevel = newLevel;
+               // Add new system message to left log history to take effect:
+               if (chatLevel === "Easy") {
+                  levelSuffix = easySuffix;
+               } else if (chatLevel === "Moderate") {
+                  levelSuffix = moderateSuffix;
+               } else {
+                  levelSuffix = expertSuffix;
+               }
+               if (leftChatLog.length === 0) {
+                  updateLog(1, {'role': 'system', 'content': leftSystemConfig +  " " + levelSuffix});
+               } else {
+                  updateLog(1, {'role': 'system', 'content': "From now on, in the following conversation, " + levelSuffix});
+               }
+            }
          } else {
-            updateRightLog(assistantReply);
+            addSystemMessage("---Invalid level---", 2);
          }
-      },
-      error: function (error) {
-         console.error('Error:', error);
+      } else if (userInput.startsWith("/system")) {
+         // Get system message:
+         var newSystemMessage = userInput.substring(userInput.indexOf("/system ") + "/system ".length);
+         // Add new system message to left log history:
+         updateLog(1, {'role': 'system', 'content': newSystemMessage});
+         addSystemMessage("---New system configuration set---", 2);
+      } else {
+         addSystemMessage("---Invalid instruction---<br>---Type /help for more information---", 2);
       }
-   });
+   } else {
+      // Add user message to chatbox:
+      addUserMessage(userInput, chatBoxNumber);
+
+      // Add loading icon:
+      const chatBoxId = '#chatBox' + chatBoxNumber;
+      $(chatBoxId).append(`<div class="loading"><img id="loading-logo" src="/static/images/loading.gif"></div>`);
+      $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
+
+      // Build the message from history log:
+      var messages = buildMessage(chatBoxNumber, userInput);   // get it from history log
+      let payload = {'messages': messages};
+
+      console.log(JSON.stringify(payload));
+
+      // Execute ajax call:
+      $.ajax({
+         type: 'POST',
+         // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
+         url: 'http://localhost:5000/chatlanguagelearning/chat',  // for testing only
+         contentType: 'application/json',
+         data: JSON.stringify(payload),
+         success: function (response) {
+            // Remove loading icon:
+            $(".loading").remove();
+
+            var assistantReply = response.message;
+            addAssistantMessage(assistantReply, chatBoxNumber);
+            // Add this new assistant message in the log history:
+            if (chatBoxNumber == 1) {
+               updatedLeftMessage = true; // now we can get this assistant message add to the right window system message as a reference
+               prevLeftAssistantMessage = assistantReply;   // update this value
+            }
+            updateLog(chatBoxNumber, {'role': 'assistant', 'content': assistantReply});
+         },
+         error: function (error) {
+            console.error('Error:', error);
+         }
+      });
+   }
 }
 
 // Build the payload messages from log history:
-function buildMessage(chatBoxNumber) {
+function buildMessage(chatBoxNumber, userInput) {
    var messages = new Array();
+   
+   // Add history log messages:
    if (chatBoxNumber === 1) {
-      messages.push({'role': 'system', 'content': leftSystemConfig});
+      if (leftChatLog.length === 0) {
+         updateLog(chatBoxNumber, {'role': 'system', 'content': leftSystemConfig + " " + levelSuffix});
+      }
+      // Add all history log into message:
       for (var i = 0; i < leftChatLog.length; i++) {
-         if (i % 2 === 0) {
-            // this is a user message:
-            messages.push({'role': 'user', 'content': leftChatLog[i]});
-         } else {
-            // this is a assistant reply:
-            messages.push({'role': 'assistant', 'content': leftChatLog[i]});
-         }
+         messages.push(leftChatLog[i]);
       }
    } else {
-      messages.push({'role': 'system', 'content': rightSystemConfig});
+      if (rightChatLog.length === 0) {
+         updateLog(chatBoxNumber, {'role': 'system', 'content': rightSystemConfig});
+      } 
+      // Avoid repeat system message:
+      if (prevLeftAssistantMessage.replace(/\s/g, "") != "" && updatedLeftMessage) {
+         updatedLeftMessage = false;
+         updateLog(chatBoxNumber, {'role': 'system', 'content': 'Answer student question based on this: ' + prevLeftAssistantMessage});
+      }
+      // Add all history log into message:
       for (var i = 0; i < rightChatLog.length; i++) {
-         if (i % 2 === 0) {
-            // this is a user message:
-            messages.push({'role': 'user', 'content': rightChatLog[i]});
-         } else {
-            // this is a assistant reply:
-            messages.push({'role': 'assistant', 'content': rightChatLog[i]});
-         }
+         messages.push(rightChatLog[i]);
       }
    }
+
+   // Add the new user input message, and update this into the correct log:
+   messages.push({'role': 'user', 'content': userInput}); // add user input message
+   updateLog(chatBoxNumber, {'role': 'user', 'content': userInput});
    return messages;
 }

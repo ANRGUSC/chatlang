@@ -5,11 +5,56 @@
 /* Configure window */
 .config-container {
    display: flex;
+   flex-wrap: wrap;
    padding: 5px;
    justify-content: center;
 }
 .config-input {
+   margin: 15px;
+   flex-basis: 15%;
+}
+.config-input input[type="text"] {
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   border: 3px solid #5c5959;
+   border-radius: 25px;
+   background-color: #ededee;
+   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+/* User input system message */
+.system-input {
+   justify-content: center;
    margin: 20px;
+   width: 95%;
+}
+.system-input input[type="text"] {
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   width: 100%;
+   border: 3px solid #5c5959;
+   border-radius: 10px;
+   background-color: #ededee;
+   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+/* Language difficulty level selection */
+select {
+   border: 3px solid #5c5959;
+   background-color: #ededee;
+   border-radius: 25px;
+}
+.config-input option {
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   border: 5px solid #5c5959;
+   border-radius: 25px;
+   background-color: #ededee;
+   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 .config-input input[type="text"] {
    padding-left: 10px;
@@ -32,17 +77,13 @@
 }
 
 /* Loading sign */
-.config-loading {
+.loading {
    position: relative;
    text-align: center;
-   margin-top: 20px;
 }
 #loading-logo {
-   width: 90px;
+   width: 70px;
    height: 100%;
-}
-.hidden {
-   display: none;
 }
 
 /* Container that include the chatbox and input */
@@ -91,5 +132,19 @@
    margin-top: 5px;
    margin-left: 3px;
    margin-right: 3px;
+   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+.chat-box-header-message {
+   text-align: center;
+   margin-top: 5px;
+   color: rgb(142, 143, 137);
+   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+.system-message {
+   text-align: left;
+   margin-top: 5px;
+   margin-left: 3px;
+   margin-right: 3px;
+   color: rgb(142, 143, 137);
    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
