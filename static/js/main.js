@@ -1,9 +1,13 @@
 // Record the last user and assistant message from left main window: (for context connection in the right chat window)
 let prevLeftAssistantMessage = "";
 
-// Keep a log history:
+// Keep a log history, array of JSON objects:
 var leftChatLog = new Array();
 var rightChatLog = new Array();
+
+// Log for export, add timestamp and some filters, will be array of Strings:
+var leftExportLog = new Array();
+var rightExportLog = new Array();
 
 // System role content:
 let leftSystemConfig = "";
@@ -21,6 +25,8 @@ let chatContext = "";
 let chatLanguage = "";
 let chatLevel = "";  // "Easy", "Moderate", or "Expert"
 let userSystemInput = "";
+let userAPIKey = ""; // user insert API key
+let userModel = "";  // user picked model
 var configClicked = false; // we only want take the first user click to the Let's Go button effective
 var updatedLeftMessage = false;  // false means: (1) did not get any assistant reply yet from the left window or (2) already updated this last left assistant reply in right window system message
 
@@ -28,18 +34,20 @@ var updatedLeftMessage = false;  // false means: (1) did not get any assistant r
 
 // When user click the "Let's Go!" button:
 function setupConfig() {
-   // Get role information
+   // Get information from the form:
    userRole = normalizeString($("#user-role").val());
    aiRole = normalizeString($("#ai-role").val());
    chatContext = $("#chat-context").val();
    chatLanguage = normalizeString($("#chat-language").val());
    chatLevel = $("#chat-level").val();
    userSystemInput = $("#system-context").val();
+   userAPIKey = $("#user-api-key").val();
+   userModel = $("#chat-model").val();
 
-   // Send message to API and store the first two messages in left chat log:
+   // Show chat windows:
    if (!configClicked && userRole.replace(/\s/g, "") != "" 
-      && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" 
-      && chatLanguage.replace(/\s/g, "") && chatLevel.replace(/\s/g, "") != "") {
+      && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" && chatLanguage.replace(/\s/g, "") 
+      && chatLevel.replace(/\s/g, "") != "" && userModel.replace(/\s/g, "") != "") {
       // disable all input box once "Let's Go!" is clicked:
       $("#user-role").prop("disabled", true);
       $("#ai-role").prop("disabled", true);
@@ -66,6 +74,13 @@ function setupConfig() {
       } else if (chatLevel === "Expert") {
          levelSuffix = expertSuffix;
       }
+
+      // Add header to left main chat window based on user input information:
+      $("#main-chat-window-header").html("Chat for " + userRole + " (user) & " + aiRole + " (AI)");
+
+      // Add initial log message in the export log arrays:
+      leftExportLog.push("This is the chat log history between " + userRole + " (user) and " + aiRole + " (AI) at the " + chatContext + " in " + chatLanguage + ".\n");
+      rightExportLog.push("This is the chat log history between Student (user) and Teacher (AI).\n");
       
       // show chat windows:
       configClicked = true;
@@ -164,9 +179,14 @@ function sendMessage(chatBoxNumber) {
 
    // Check to see if on right window and message is a instruction message of "-help", "-level" or "system":
    if (chatBoxNumber == 2 && userInput.startsWith("/")) {
+      // This should be considered as a system message, we append it in right export log:
+      rightExportLog.push(getCurrentTime() + "User: " + userInput);
+
       if (userInput.startsWith("/help")) {
          addSystemMessage("/level [level]:<br>&emsp;&emsp;&emsp;Change current level to [level]<br>&emsp;&emsp;&emsp;[level] must be Easy, Moderate, or Expert", 1);
          addSystemMessage("/system [message]:<br>&emsp;&emsp;&emsp;Add instruction to chat bot<br>&emsp;&emsp;&emsp;e.g. You are upset./Start sentence with...", 1);
+         rightExportLog.push(getCurrentTime() + "System: /level [level]: Change current level to [level], [level] must be Easy, Moderate, or Expert.\t" +
+            "/system [message]: Add instruction to chat bot. e.g. You are upset./Start sentence with...");
       } else if (userInput.startsWith("/level")) {
          // Get level:
          var newLevel = userInput.substring(userInput.indexOf("/level ") + "/level ".length);
@@ -175,6 +195,7 @@ function sendMessage(chatBoxNumber) {
          if (newLevel === "Easy" || newLevel === "Moderate" || newLevel === "Expert") {
             if (newLevel === chatLevel) {
                addSystemMessage("---Level unchanged---", 2);
+               rightExportLog.push(getCurrentTime() + "System: ---Level unchanged---");
             } else {
                // Update select value to avoid confusion:
                $("#chat-level").prop("disabled", false);
@@ -182,6 +203,7 @@ function sendMessage(chatBoxNumber) {
                $("#chat-level").prop("disabled", true);
                // Show message:
                addSystemMessage("---Level changed from " + chatLevel + " to " + newLevel + "---", 2);
+               rightExportLog.push(getCurrentTime() + "System: ---Level changed from " + chatLevel + " to " + newLevel + "---");
                // Update chat level:
                chatLevel = newLevel;
                // Add new system message to left log history to take effect:
@@ -200,17 +222,29 @@ function sendMessage(chatBoxNumber) {
             }
          } else {
             addSystemMessage("---Invalid level---", 2);
+            rightExportLog.push(getCurrentTime() + "System: ---Invalid level---");
          }
       } else if (userInput.startsWith("/system")) {
          // Get system message:
          var newSystemMessage = userInput.substring(userInput.indexOf("/system ") + "/system ".length);
          // Add new system message to left log history:
          updateLog(1, {'role': 'system', 'content': newSystemMessage});
-         addSystemMessage("---New system configuration set---", 2);
+         addSystemMessage("System message: \"" + newSystemMessage + "\" has been successfully configured.", 1);
+         rightExportLog.push(getCurrentTime() + "System: " + "System message: \"" + newSystemMessage + "\" has been successfully configured.");
       } else {
          addSystemMessage("---Invalid instruction---<br>---Type /help for more information---", 2);
+         rightExportLog.push(getCurrentTime() + "System: ---Invalid instruction---\t---Type /help for more information---");
       }
    } else {
+      // add user message to log history for export:
+      if (chatBoxNumber == 1) {
+         const currUserMessage = getCurrentTime() + userRole + ": " + userInput;
+         leftExportLog.push(currUserMessage);
+      } else {
+         const currUserMessage = getCurrentTime() + "Student: " + userInput;
+         rightExportLog.push(currUserMessage);
+      }
+
       // Add user message to chatbox:
       addUserMessage(userInput, chatBoxNumber);
 
@@ -221,9 +255,7 @@ function sendMessage(chatBoxNumber) {
 
       // Build the message from history log:
       var messages = buildMessage(chatBoxNumber, userInput);   // get it from history log
-      let payload = {'messages': messages};
-
-      console.log(JSON.stringify(payload));
+      let payload = {'api': userAPIKey, 'model': userModel, 'messages': messages};  // payload include gpt model, api-key, and messages
 
       // Execute ajax call:
       $.ajax({
@@ -233,17 +265,27 @@ function sendMessage(chatBoxNumber) {
          contentType: 'application/json',
          data: JSON.stringify(payload),
          success: function (response) {
-            // Remove loading icon:
-            $(".loading").remove();
-
             var assistantReply = response.message;
+
+            // Remove loading icon and add assistant message to chat:
+            $(".loading").remove();
             addAssistantMessage(assistantReply, chatBoxNumber);
+
             // Add this new assistant message in the log history:
             if (chatBoxNumber == 1) {
                updatedLeftMessage = true; // now we can get this assistant message add to the right window system message as a reference
                prevLeftAssistantMessage = assistantReply;   // update this value
             }
             updateLog(chatBoxNumber, {'role': 'assistant', 'content': assistantReply});
+
+            // Add assistant reply to log history for export:
+            if (chatBoxNumber == 1) {
+               const currUserMessage = getCurrentTime() + aiRole + ": " + assistantReply;
+               leftExportLog.push(currUserMessage);
+            } else {
+               const currUserMessage = getCurrentTime() + "Teacher: " + assistantReply;
+               rightExportLog.push(currUserMessage);
+            }
          },
          error: function (error) {
             console.error('Error:', error);
@@ -284,4 +326,51 @@ function buildMessage(chatBoxNumber, userInput) {
    messages.push({'role': 'user', 'content': userInput}); // add user input message
    updateLog(chatBoxNumber, {'role': 'user', 'content': userInput});
    return messages;
+}
+
+// Get current time for the time stamp to store in log:
+function getCurrentTime() {
+   const currentTime = new Date();
+
+   // current date components:
+   const year = currentTime.getFullYear();
+   const month = currentTime.getMonth() + 1; // months are zero-based, add 1 to get the actual month
+   const day = currentTime.getDate();
+
+   // current time components:
+   const hours = currentTime.getHours();
+   const minutes = currentTime.getMinutes();
+   const seconds = currentTime.getSeconds();
+
+   // "year-month-day hour-minute-second: "
+   const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}: `;
+   return formattedDateTime;
+}
+
+// Generate a txt file for export log history and auto-downloading:
+function generateLogFile(chatBoxNumber) {
+   // one line per chat history
+   let chatLog = "";
+   if (chatBoxNumber === 1) {
+      chatLog = leftExportLog.join("\n"); 
+   } else {
+      chatLog = rightExportLog.join("\n"); 
+   }
+
+   const blob = new Blob([chatLog], { type: "text/plain" });
+   const url = URL.createObjectURL(blob);
+   const link = document.createElement("a");
+   link.href = url;
+
+   if (chatBoxNumber == 1) {
+      link.download = userRole + "_" + aiRole + "_chat_log.txt";
+   } else {
+      link.download = "student_teacher_chat_log.txt";
+   }
+
+   // trigger the download:
+   link.click();
+
+   // after the download clean up the URL object:
+   URL.revokeObjectURL(url);
 }

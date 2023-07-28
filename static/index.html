@@ -1,63 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Chat Language Learning</title>
+<title>Role Play Chat Language Learning</title>
+<link rel="icon" href="/static/images/anrgLogo.png" type="image/png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/static/css/indexstyle.css">
 <script type="text/javascript" src="/static/js/main.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
+   <!-- Top logo and text -->
+   <div class="top-logo">
+      <a id="angr-top" href="https://anrg.usc.edu/www/" target="_blank">
+         <img id="angr-top" src="/static/images/anrgLogo.png">
+      </a>
+      <div id="top-logo-text">Role Play Chat for Language Learning</div>
+   </div>
+
+   <!-- Brief description and link to read me & submit feedback -->
+   <div class="top-description">
+      Start chat by filling out the information below. Click <a href="/static/readme.html" class="custom-link" target="_blank">here</a> for more detailed instructions. 
+      Have issues? Leave us feedbacks in <a href="https://forms.gle/UrfEPhhZ1A7Dyayv6" class="custom-link" target="_blank">here</a>.
+   </div>
+
    <!-- This is the Prompt for user to enter role -->
-   <form class="config-container" onsubmit="return false">
+   <form class="config-container" id="info-form" onsubmit="return false">
       <div class="config-input">
-         <input type="text" id="chat-context" placeholder="Enter scenario context" required>
+         <label for="chat-context">Scenario: </label>
+         <input type="text" id="chat-context" placeholder="e.g. Restaurant" required>
       </div>
       <div class="config-input">
-         <input type="text" id="ai-role" placeholder="Enter assistant role" required>
+         <label for="ai-role">AI Role: </label>
+         <input type="text" id="ai-role" placeholder="e.g. Waiter" required>
       </div>
       <div class="config-input">
-         <input type="text" id="user-role" placeholder="Enter your role" required>
+         <label for="user-role">Your Role: </label>
+         <input type="text" id="user-role" placeholder="e.g. Customer" required>
       </div>
       <div class="config-input">
-         <input type="text" id="chat-language" placeholder="Enter a language" required>
+         <label for="chat-language">Chat Language: </label>
+         <input type="text" id="chat-language" placeholder="e.g. French" required>
       </div>
-      <select class="config-input" id="chat-level" required>
-         <option value="">Select Level</option>
-         <option value="Easy">Easy</option>
-         <option value="Moderate">Moderate</option>
-         <option value="Expert">Expert</option>
-      </select>
-      <button class="config-button" onclick="setupConfig()">Let's Go!</button>
-      <button class="config-button" onclick="resetConfig()">Restart</button>
-      <div class="system-input">
-         <input type="text" id="system-context" placeholder="Add optional notes for the chat bot">
+      <div class="config-input">
+         <label for="chat-level">Difficulty Level: </label>
+         <select id="chat-level" required>
+            <option value="" class="option-font">Select Level</option>
+            <option value="Easy" class="option-font">Easy</option>
+            <option value="Moderate" class="option-font">Moderate</option>
+            <option value="Expert" class="option-font">Expert</option>
+         </select>
+      </div>
+      <div class="config-input">
+         <label for="chat-model">API Model: </label>
+         <select id="chat-model" required>
+            <option value="" class="option-font">Select Model</option>
+            <option value="gpt-4" class="option-font">gpt-4</option>
+            <option value="gpt-4-32k" class="option-font">gpt-4-32k</option>
+            <option value="gpt-3.5-turbo" class="option-font">gpt-3.5-turbo</option>
+            <option value="gpt-3.5-turbo-16k" class="option-font">gpt-3.5-turbo-16k</option>
+         </select>
+      </div>
+      <div class="config-input">
+         <label for="system-context">Notes for AI (Optional): </label>
+         <input type="text" id="system-context" placeholder="e.g. Today is your birthday!">
+      </div>
+      <div class="config-input">
+         <label for="user-api-key">API Key (Optional): </label>
+         <input type="text" id="user-api-key" placeholder="">
       </div>
    </form>
 
-   <!--Loading sign-->
-   <!-- <div class="config-loading hidden">
-      <img id="loading-logo" src="/static/images/loading.gif">
-   </div> -->
+   <!-- Two buttons -->
+   <div class="button-container">
+      <button class="config-button" form="info-form" onclick="setupConfig()">Let's Go!</button>
+      <button class="config-button" onclick="resetConfig()">Restart</button>
+   </div>
 
    <!-- Here are the two chat windows with separate user input box right below each chat window -->
    <div class="chat-box-container">
       <div class="window">
+         <div class="chat-window-header" id="main-chat-window-header"></div>
          <div class="chat-box" id="chatBox1">
             <div class="chat-box-header-message">---Ready to chat---</div>
          </div>    
          <div class="user-input">
-            <input type="text" id="inputBox1" placeholder="Press enter to send message" onkeypress="enterMessage(event, 1)">
+            <input type="text" id="inputBox1" placeholder="Start chat anytime!" onkeypress="enterMessage(event, 1)">
+         </div>
+         <div class="export-button-container">
+            <button class="export-button" onclick="generateLogFile(1)">Export Chat Log</button>
          </div>
       </div>
       <div class="window">
+         <div class="chat-window-header">Chat for Student (user) & Teacher (AI)</div>
          <div class="chat-box" id="chatBox2">
             <div class="chat-box-header-message">---Type "/help" to see more instructions---</div>
          </div>
          <div class="user-input">
-            <input type="text" id="inputBox2" placeholder="Press enter to send message" onkeypress="enterMessage(event, 2)">
+            <input type="text" id="inputBox2" placeholder="Ask questions in here!" onkeypress="enterMessage(event, 2)">
+         </div>
+         <div class="export-button-container">
+            <button class="export-button" onclick="generateLogFile(2)">Export Chat Log</button>
          </div>
       </div>
+   </div>
+
+   <div class="bottom-container">
+      <p id="bottom-text">(c) 2023, <a href="https://anrg.usc.edu/www/" class="custom-link" target="_blank">Autonomous Networks Research Group</a>, University of Southern California, All Rights Reserved.</p>
    </div>
 </body>
 </html>

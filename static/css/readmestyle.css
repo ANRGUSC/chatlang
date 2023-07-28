@@ -1,0 +1,49 @@
+body {
+   margin: 20px;
+   padding: 0px;
+   background-color: #434345;
+}
+.description-text-header {
+   display: flex;
+   margin-bottom: 20px;
+   width: 100%;
+   font-size: 27px;
+   color: rgb(251, 227, 204);
+   font-family: 'Pacifico', cursive;
+}
+.description-text {
+   width: 100%;
+   font-size: 20px;
+   margin-bottom: 10px;
+   color: rgb(251, 227, 204);
+   font-family: 'Pacifico', cursive;
+}
+.description-text-bold {
+   width: 100%;
+   font-size: 20px;
+   margin-bottom: 10px;
+   font-weight: bold;
+   color: rgb(219, 124, 124);
+   font-family: 'Pacifico', cursive;
+}
+.demo-img {
+   height: 100px;
+   width: auto;
+   margin-bottom: 10px;
+}
+.demo-img-chat {
+   height: 500px;
+   width: auto;
+   margin-bottom: 10px;
+}
+.demo-img-log-1 {
+   height: 230px;
+   width: auto;
+   margin-bottom: 10px;
+}
+.demo-img-log-2 {
+   height: 485px;
+   width: auto;
+   margin-bottom: 10px;
+}
+
