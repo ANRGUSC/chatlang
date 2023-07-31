@@ -5,10 +5,9 @@ from flask_cors import CORS, cross_origin
 import openai
 import requests
 from dotenv import load_dotenv
-# from flask_dance.contrib.github import make_github_blueprint, github
-# from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
-# import secrets
-# from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_dance.contrib.github import make_github_blueprint, github
+import secrets
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
@@ -18,47 +17,36 @@ PREFIX = os.getenv("PREFIX")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 
-# SECRET_KEY = secrets.token_urlsafe(16)
-
-print("GITHUB_CLIENT_ID: ", GITHUB_CLIENT_ID)
-print("GITHUB_CLIENT_SECRET: ", GITHUB_CLIENT_SECRET)
+SECRET_KEY = secrets.token_urlsafe(16)
 
 app = Flask(__name__, static_folder='static')
 CORS(app, support_credentials=True)
-# app.secret_key = SECRET_KEY
-# app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.secret_key = SECRET_KEY
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-print('prefix: ', PREFIX)
 bp = Blueprint('chatlang', __name__, url_prefix=PREFIX, static_folder='static', static_url_path='/static')
 
-# github_blueprint = make_github_blueprint(
-#     client_id=GITHUB_CLIENT_ID,
-#     client_secret=GITHUB_CLIENT_SECRET,
-#     # redirect_url=f"https://eclipse.usc.edu/chatlang/login/github/authorized"
-# )
-# app.register_blueprint(github_blueprint, url_prefix=f"{PREFIX}/login")
+bp_github = make_github_blueprint(
+    client_id=GITHUB_CLIENT_ID, 
+    client_secret=GITHUB_CLIENT_SECRET,
+    redirect_to='chatlang.main_page'
+)
+bp.register_blueprint(bp_github, url_prefix='/login')
 
-# login_manager = LoginManager(app)
-
-
-# class User(UserMixin):
-#     def __init__(self, id):
-#         self.id = id
-
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return User(user_id)
-
-# @app.route("/logout")
-# def logout():
-#     logout_user()
-#     return flask.redirect(flask.url_for("main_page"))
-
-@app.route("/")
+# This is the main page:
+@bp.route('/', methods=['GET', 'POST'])
 def main_page():
-#    if not current_user.is_authenticated:
-#         return flask.redirect(flask.url_for("github.login"))
-   return flask.render_template('index.html')
+    if not github.authorized:
+        if request.method == 'POST':
+            return flask.redirect(flask.url_for("github.login"))
+        else:
+            return flask.render_template('login.html')
+    return flask.render_template('index.html')
+
+@bp.route('/logout')
+def logout():
+    flask.session.clear()
+    return flask.redirect(flask.url_for("chatlang.main_page"))
 
 # This is the read me page:
 @bp.route('/readme')
@@ -68,8 +56,8 @@ def read_me_page():
 # Get response for user's prompt:
 @bp.route('/chatlanguagelearning/chat', methods=['GET', 'POST'])
 def get_meta_response():
-    # if not current_user.is_authenticated:
-    #     return jsonify({'message': 'Uh-oh! You are not logged in. Please log in to continue.'})
+    if not github.authorized:
+        return jsonify({'message': 'Uh-oh! You are not logged in. Please log in to continue.'})
     # get the user message (a dict of messages):
     user_message = request.get_json()['messages']
     user_api_key = request.get_json()['api']

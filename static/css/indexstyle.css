@@ -281,3 +281,51 @@ button.export-button:hover {
  .custom-link:visited {
    color: rgb(255, 142, 36);
  }
+
+ 
+ .login-container {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+.login-container a {
+   color: white !important;
+   padding: 20px;
+   border: 1px solid white;
+   border-radius: 5px;
+   font-size: 20px;
+   text-decoration: none;
+}
+
+.login-container a:hover {
+   background-color: white;
+   color: black !important;
+}
+
+
+.logout-container {
+   position: absolute;
+   right: 0;
+   top: 0;
+   margin: 10px;
+}
+
+.logout-container a {
+   color: black !important;
+   padding-left: 15px;
+   padding-right: 15px;
+   padding-top: 10px;
+   padding-bottom: 10px;
+   border: 1px solid black;
+   border-radius: 5px;
+   font-size: 15px;
+   text-decoration: none;
+   margin-top: 5px;
+}
+
+.logout-container a:hover {
+   background-color: black;
+   color: white !important;
+}
