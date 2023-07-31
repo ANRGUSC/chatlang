@@ -304,12 +304,11 @@ button.export-button:hover {
    color: black !important;
 }
 
-
 .logout-container {
    position: absolute;
    right: 0;
    top: 0;
-   margin: 10px;
+   margin: 15px;
 }
 
 .logout-container a {
@@ -322,7 +321,6 @@ button.export-button:hover {
    border-radius: 5px;
    font-size: 15px;
    text-decoration: none;
-   margin-top: 5px;
 }
 
 .logout-container a:hover {
