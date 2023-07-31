@@ -255,7 +255,8 @@ function sendMessage(chatBoxNumber) {
 
       // Add loading icon:
       const chatBoxId = '#chatBox' + chatBoxNumber;
-      $(chatBoxId).append(`<div class="loading"><img id="loading-logo" src="/static/images/loading.gif"></div>`);
+      // current_url + /static/images/loading.gif
+      $(chatBoxId).append(`<div class="loading"><img id="loading-logo" src="static/images/loading.gif"></div>`);
       $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
 
       // Build the message from history log:
@@ -266,7 +267,7 @@ function sendMessage(chatBoxNumber) {
       $.ajax({
          type: 'POST',
          // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
-         url: 'http://localhost:5000/chatlanguagelearning/chat',  
+         url: 'chatlanguagelearning/chat',  
          contentType: 'application/json',
          data: JSON.stringify(payload),
          success: function (response) {

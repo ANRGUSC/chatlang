@@ -8,9 +8,11 @@ services:
     environment:
       - FLASK_ENV=development
       - PREFIX=/chatlang
+      - ENABLE_GITHUB_LOGIN=true
     volumes:
       - .env:/app/.env
-    command: python3 /app/server.py
+    # command: python3 /app/server.py\
+    command: gunicorn --bind 0.0.0.0:5000 server:app
     deploy:
       labels:
         - "traefik.port=5000"
