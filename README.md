@@ -4,7 +4,7 @@
 
 This is a detailed description on how to use the role play chat for language learning. Let's get started!
 
-To begin with, you can easily find this information form section:
+To begin with, please fill out the configuration inputs required.
 
 ![info_form_empty](static/images/readme/info_form_empty.png)
 
@@ -34,9 +34,9 @@ The headers show your (user) role and the AI's role in each chat window.
 
 ![chat_start](static/images/readme/chat_start.png)
 
-The left chat window is the main chat where you and the AI will role play chat using the language you want to learn.
+The window on the left is for you to have the conversation in your target language, the one you are learning.
 
-You can ask questions and give system instructions on the right meta chat window. Let's try this out.
+The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. This can be in the language you already know (e.g., English).
 
 ![chat_1](static/images/readme/chat_1.png)
 
