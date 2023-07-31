@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>Role Play Chat Language Learning</title>
+   <link rel="icon" href="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}" type="image/png">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   {% block head %}{% endblock %}
+</head>
+<body>
+
+    {% block content %}{% endblock %}
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
+    {% block scripts %}{% endblock %}
+</body>
+</html>

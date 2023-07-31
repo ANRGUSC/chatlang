@@ -1,25 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>Role Play Chat Language Learning</title>
-<link rel="icon" href="/static/images/anrgLogo.png" type="image/png">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/static/css/indexstyle.css">
-<script type="text/javascript" src="/static/js/main.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block head %}
+   <link rel="stylesheet" href="{{ url_for('chatlang.static', filename='css/indexstyle.css') }}">
+{% endblock %}
+
+{% block content %}
    <!-- Top logo and text -->
    <div class="top-logo">
       <a id="angr-top" href="https://anrg.usc.edu/www/" target="_blank">
-         <img id="angr-top" src="/static/images/anrgLogo.png">
+         <img id="angr-top" src="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}">
       </a>
       <div id="top-logo-text">Role Play Chat for Language Learning</div>
    </div>
 
    <!-- Brief description and link to read me & submit feedback -->
    <div class="top-description">
-      Start chat by filling out the information below. Click <a href="/static/readme.html" class="custom-link" target="_blank">here</a> for more detailed instructions. 
+      Start chat by filling out the information below. Click <a href="{{ url_for('chatlang.read_me_page') }}" class="custom-link" target="_blank">here</a> for more detailed instructions. 
       Have issues? Leave us feedback in <a href="https://forms.gle/UrfEPhhZ1A7Dyayv6" class="custom-link" target="_blank">here</a>.
    </div>
 
@@ -109,5 +105,8 @@
    <div class="bottom-container">
       <p id="bottom-text">(c) 2023, <a href="https://anrg.usc.edu/www/" class="custom-link" target="_blank">Autonomous Networks Research Group</a>, University of Southern California, All Rights Reserved.</p>
    </div>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}
+   <script type="text/javascript" src="{{ url_for('chatlang.static', filename='js/main.js') }}"></script>
+{% endblock %}

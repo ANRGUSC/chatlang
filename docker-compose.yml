@@ -1,0 +1,25 @@
+version: '3'
+services:
+  chatlang: 
+    image: jaredraycoleman/chatlang:latest
+    build: .
+    networks:
+      - traefik_proxy
+    environment:
+      - FLASK_ENV=development
+      - PREFIX=/chatlang
+    volumes:
+      - .env:/app/.env
+    command: python3 /app/server.py
+    deploy:
+      labels:
+        - "traefik.port=5000"
+        - "traefik.backend=chatlang"
+        - "traefik.frontend.rule=PathPrefix:/chatlang"
+      placement:
+        constraints:
+          - node.role == manager
+          
+networks:
+  traefik_proxy:
+    external: true

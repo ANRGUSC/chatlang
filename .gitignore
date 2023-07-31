@@ -30,5 +30,4 @@
 *.rar
 
 # env file:
-OPENAI_API_KEY
-*.txt
+.env
