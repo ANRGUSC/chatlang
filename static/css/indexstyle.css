@@ -321,6 +321,7 @@ button.export-button:hover {
    border-radius: 5px;
    font-size: 15px;
    text-decoration: none;
+   background-color: white;
 }
 
 .logout-container a:hover {
