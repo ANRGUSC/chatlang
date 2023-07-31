@@ -36,7 +36,7 @@ The headers show your (user) role and the AI's role in each chat window.
 
 ![chat_start](static/images/readme/chat_start.png)
 
-The window on the left is for you to have the conversation in your target language, the one you are learning.
+The window on the left is for you to have the conversation in your target language, the one you are learning (e.g., Chinese).
 
 The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. This can be in the language you already know (e.g., English).
 
