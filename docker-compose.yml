@@ -8,6 +8,7 @@ services:
     environment:
       - FLASK_ENV=development
       - PREFIX=/chatlang
+      - ENABLE_GITHUB_LOGIN=true
     volumes:
       - .env:/app/.env
     command: python3 /app/server.py

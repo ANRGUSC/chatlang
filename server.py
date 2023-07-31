@@ -16,6 +16,7 @@ OPENAI_ORG_ID = os.environ["OPENAI_ORG_ID"]
 PREFIX = os.getenv("PREFIX")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
+ENABLE_GITHUB_LOGIN = os.getenv("ENABLE_GITHUB_LOGIN")
 
 SECRET_KEY = secrets.token_urlsafe(16)
 
@@ -26,21 +27,23 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 bp = Blueprint('chatlang', __name__, url_prefix=PREFIX, static_folder='static', static_url_path='/static')
 
-bp_github = make_github_blueprint(
-    client_id=GITHUB_CLIENT_ID, 
-    client_secret=GITHUB_CLIENT_SECRET,
-    redirect_to='chatlang.main_page'
-)
-bp.register_blueprint(bp_github, url_prefix='/login')
+if ENABLE_GITHUB_LOGIN == "true":
+    bp_github = make_github_blueprint(
+        client_id=GITHUB_CLIENT_ID, 
+        client_secret=GITHUB_CLIENT_SECRET,
+        redirect_to='chatlang.main_page'
+    )
+    bp.register_blueprint(bp_github, url_prefix='/login')
 
 # This is the main page:
 @bp.route('/', methods=['GET', 'POST'])
 def main_page():
-    if not github.authorized:
-        if request.method == 'POST':
-            return flask.redirect(flask.url_for("github.login"))
-        else:
-            return flask.render_template('login.html')
+    if ENABLE_GITHUB_LOGIN == "true":
+        if not github.authorized:
+            if request.method == 'POST':
+                return flask.redirect(flask.url_for("github.login"))
+            else:
+                return flask.render_template('login.html')
     return flask.render_template('index.html')
 
 @bp.route('/logout')
@@ -56,8 +59,9 @@ def read_me_page():
 # Get response for user's prompt:
 @bp.route('/chatlanguagelearning/chat', methods=['GET', 'POST'])
 def get_meta_response():
-    if not github.authorized:
-        return jsonify({'message': 'Uh-oh! You are not logged in. Please log in to continue.'})
+    if ENABLE_GITHUB_LOGIN == "true":
+        if not github.authorized:
+            return jsonify({'message': 'Uh-oh! You are not logged in. Please log in to continue.'})
     # get the user message (a dict of messages):
     user_message = request.get_json()['messages']
     user_api_key = request.get_json()['api']
