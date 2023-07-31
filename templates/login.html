@@ -11,6 +11,12 @@
     <a href="{{ url_for('chatlang.github.login') }}" class="login-button">Log In with Github</a>
 </div>
 
+{% if error %}
+<div class="error-container">
+    {{ error }}
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}

@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask, Blueprint, request, jsonify
 import flask
@@ -20,6 +21,8 @@ ENABLE_GITHUB_LOGIN = os.getenv("ENABLE_GITHUB_LOGIN")
 
 SECRET_KEY = secrets.token_urlsafe(16)
 
+logging.basicConfig(level=logging.INFO)
+
 app = Flask(__name__, static_folder='static')
 CORS(app, support_credentials=True)
 app.secret_key = SECRET_KEY
@@ -31,7 +34,8 @@ if ENABLE_GITHUB_LOGIN == "true":
     bp_github = make_github_blueprint(
         client_id=GITHUB_CLIENT_ID, 
         client_secret=GITHUB_CLIENT_SECRET,
-        redirect_to='chatlang.main_page'
+        redirect_to='chatlang.main_page',
+        scope="read:org"
     )
     bp.register_blueprint(bp_github, url_prefix='/login')
 
@@ -41,9 +45,23 @@ def main_page():
     if ENABLE_GITHUB_LOGIN == "true":
         if not github.authorized:
             if request.method == 'POST':
+                logging.info("Logging in with Github.")
                 return flask.redirect(flask.url_for("github.login"))
             else:
+                logging.info("Not logged in - showing login page.")
                 return flask.render_template('login.html')
+        else:
+            resp = github.get("/user/orgs")
+            if resp.ok:
+                orgs = resp.json()
+                if not any(org['login'] == 'ANRGUSC' for org in orgs):
+                    logging.error("User is not a member of the ANRGUSC Github organization.")
+                    return flask.render_template('login.html', error="Access Denied. You are not a member of the ANRGUSC Github organization.")
+                else:
+                    logging.info("Github login successful.")
+            else:
+                logging.error(f"Github login failed. {resp.status_code} {resp.text}")
+                return flask.render_template('login.html', error="Access Denied. Github login failed.")
     return flask.render_template('index.html')
 
 @bp.route('/logout')

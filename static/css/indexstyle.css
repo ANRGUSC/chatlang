@@ -327,3 +327,16 @@ button.export-button:hover {
    background-color: black;
    color: white !important;
 }
+
+.error-container {
+   position: absolute;
+   top: 0%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   min-height: 100px;
+   padding: 20px;
+   border-radius: 5px;
+   background-color: #dc3545;
+   color: black;
+   text-align: center;
+}
