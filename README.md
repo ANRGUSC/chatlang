@@ -2,9 +2,11 @@
 
 ## Welcome!
 
-This is a detailed description on how to use the role play chat for language learning. Let's get started!
+This is a language learning tool that allows you to role-play different characters in a target language of your choosing, a language you are trying to learn. Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with differentiated uses. The window on the left is where you have a conversation with the AI chatbot in the target language (this can be any language at all, Chinese, French, Hindi, Japanese, Persian, Portugese, Spanish, Sanskrit.. your choice!). The window on the right allows you to ask questions about vocabulary, grammar, etc. in your native language (say English, or whatever language you are fluent in) without interrupting the flow of the roleplay dialog. You can also use the right window to adjust the difficulty level of the conversation, provide additional contextual information, and other "meta" comments or directions to influence the dialog. 
 
-To begin with, you can easily find this information form section:
+Below is a detailed description on how to use this tool.  Let's get started!
+
+To begin with, you will need to provide inputs in the configuration section at the top of the webpage:
 
 ![info_form_empty](static/images/readme/info_form_empty.png)
 
@@ -34,9 +36,9 @@ The headers show your (user) role and the AI's role in each chat window.
 
 ![chat_start](static/images/readme/chat_start.png)
 
-The left chat window is the main chat where you and the AI will role play chat using the language you want to learn.
+The window on the left is for you to have the conversation in your target language, the one you are learning (e.g., Chinese).
 
-You can ask questions and give system instructions on the right meta chat window. Let's try this out.
+The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. This can be in the language you already know (e.g., English).
 
 ![chat_1](static/images/readme/chat_1.png)
 
