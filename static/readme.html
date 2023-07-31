@@ -8,19 +8,24 @@
 </head>
 <body>
    <div class="description-text-header">Welcome! This is a detailed description on how to use the role play chat for language learning. Let's get started!</div>
-   <div class="description-text">To begin with, you can easily find this information form section:</div>
+   
+   <div class="description-text">
+      This is a language learning tool that allows you to role-play different characters in a target language of your choosing.
+   </div>
+   <div class="description-text">To begin with, please fill out the configuration inputs required.</div>
    <img class="demo-img" src="/static/images/readme/info_form_empty.png">
-   <div class="description-text">The <span class="description-text-bold">Notes for AI</span> and <span class="description-text-bold">API Key</span> fields are optional.</div>
+   <!-- <div class="description-text">The <span class="description-text-bold">Notes for AI</span> and <span class="description-text-bold">API Key</span> fields are optional.</div> -->
+   <div class="description-text">The <span class="description-text-bold">Notes for AI</span> field is optional.</div>
    <div class="description-text">
       You can fill the <span class="description-text-bold">Notes for AI</span> like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
    </div>
-   <div class="description-text">
+   <!-- <div class="description-text">
       <span class="description-text-bold">API Key</span> is required only if you don't have your local API set up. 
       If you just want to test this out, you will need to insert your API key in here everytime you restart the chat.
       To set-up your local API key, open the <span class="description-text-bold">server.py</span> file and locate this line of code: (at the beginning)
    </div>
-   <div class="description-text">* Have your <span class="description-text-bold">OPENAI_API_KEY.txt</span> contain your API key and place it in the same folder with your server.py file.</div>
-   <img class="demo-img" src="/static/images/readme/api_setup_1.png">
+   <div class="description-text">* Have your <span class="description-text-bold">OPENAI_API_KEY.txt</span> contain your API key and place it in the same folder with your server.py file.</div> -->
+   <!-- <img class="demo-img" src="/static/images/readme/api_setup_1.png"> -->
    <div class="description-text">Let's continue! This is just a sample.</div>
    <div class="description-text">* Please use proper and rational scenario settings e.g. customer & waiter in a restaurant. Otherwise, the AI may behave strangely.</div>
    <img class="demo-img" src="/static/images/readme/info_form_filled.png">
@@ -30,10 +35,17 @@
       You can click the <span class="description-text-bold">Restart</span> button to reset the page. 
       Click the <span class="description-text-bold">Let's Go!</span> button, you will see the two chat windows appear:
    </div>
-   <div class="description-text">The headers shows your (user) role and the AI's role in each chat window.</div>
+   <div class="description-text">
+      The headers show your (user) role and the AI's role in each chat window.
+   </div>
    <img class="demo-img-chat" src="/static/images/readme/chat_start.png">
-   <div class="description-text">The left chat window is the main chat where you and the AI will role play chat using the language you want to learn.</div>
-   <div class="description-text">You can ask questions and give system instructions on the right meta chat window. Let's try this out.</div>
+   <div class="description-text">
+      The window on the left is for you to have the conversation in your target language, the one you are learning. 
+   </div>
+   <div class="description-text">
+      The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. 
+      This can be in the language you already know (e.g., English).
+   </div>
    <img class="demo-img-chat" src="/static/images/readme/chat_1.png">
    <div class="description-text">
       As you can see above, you can chat with the AI in the setting given on the left chat window. 
@@ -42,7 +54,7 @@
    <img class="demo-img-chat" src="/static/images/readme/chat_2.png">
    <img class="demo-img-chat" src="/static/images/readme/chat_3.png">
    <div class="description-text">
-      As you can see above, you can change your level anytime if you feel its too hard or too eazy. There are three different levels: 
+      As you can see above, you can change your level anytime if you feel its too hard or too easy. There are three different levels: 
       <span class="description-text-bold">Easy</span>, <span class="description-text-bold">Moderate</span>, and <span class="description-text-bold">Expert</span>.
       You can change your level with <span class="description-text-bold">/level [desired level]</span> command.
    </div>

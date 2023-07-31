@@ -52,7 +52,8 @@
       </div>
       <div class="config-input">
          <label for="chat-model">API Model: </label>
-         <select id="chat-model" required>
+         <!-- Delete disabled in here re re-enble this drop down for model choice -->
+         <select id="chat-model" required disabled>   
             <option value="" class="option-font">Select Model</option>
             <option value="gpt-4" class="option-font">gpt-4</option>
             <option value="gpt-4-32k" class="option-font">gpt-4-32k</option>
@@ -66,7 +67,8 @@
       </div>
       <div class="config-input">
          <label for="user-api-key">API Key (Optional): </label>
-         <input type="text" id="user-api-key" placeholder="">
+         <!-- Delete this disabled for future deploying -->
+         <input type="password" id="user-api-key" placeholder="" disabled>
       </div>
    </form>
 

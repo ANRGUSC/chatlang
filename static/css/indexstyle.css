@@ -91,6 +91,17 @@ select {
    background-color: #ededee;
    font-family: 'Pacifico', cursive;
 }
+.config-input input[type="password"] {
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   width: 150px;
+   border: 3px solid #5c5959;
+   border-radius: 25px;
+   background-color: #ededee;
+   font-family: 'Pacifico', cursive;
+}
 
 /* Two buttons */
 .button-container {

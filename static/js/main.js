@@ -42,7 +42,10 @@ function setupConfig() {
    chatLevel = $("#chat-level").val();
    userSystemInput = $("#system-context").val();
    userAPIKey = $("#user-api-key").val();
-   userModel = $("#chat-model").val();
+
+   // change this back for future deploying:
+   // userModel = $("#chat-model").val();
+   userModel = "gpt-3.5-turbo";  // for testing only
 
    // Show chat windows:
    if (!configClicked && userRole.replace(/\s/g, "") != "" 
@@ -55,6 +58,8 @@ function setupConfig() {
       $("#chat-language").prop("disabled", true);
       $("#chat-level").prop("disabled", true);
       $("#system-context").prop("disabled", true);
+      $("#chat-model").prop("disabled", true);
+      $("#user-api-key").prop("disabled", true);
 
       // Set up environment and user prefix for chat:
       // Left window system config:
@@ -261,7 +266,7 @@ function sendMessage(chatBoxNumber) {
       $.ajax({
          type: 'POST',
          // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
-         url: 'http://localhost:5000/chatlanguagelearning/chat',  // for testing only
+         url: 'http://localhost:5000/chatlanguagelearning/chat',  
          contentType: 'application/json',
          data: JSON.stringify(payload),
          success: function (response) {
