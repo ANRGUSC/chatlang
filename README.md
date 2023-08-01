@@ -2,9 +2,7 @@
 
 ## Welcome!
 
-This is a language learning tool that allows you to role-play different characters in a target language of your choosing, a language you are trying to learn. Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with differentiated uses. The window on the left is where you have a conversation with the AI chatbot in the target language (this can be any language at all, Chinese, French, Hindi, Japanese, Persian, Portugese, Spanish, Sanskrit.. your choice!). The window on the right allows you to ask questions about vocabulary, grammar, etc. in your native language (say English, or whatever language you are fluent in) without interrupting the flow of the roleplay dialog. You can also use the right window to adjust the difficulty level of the conversation, provide additional contextual information, and other "meta" comments or directions to influence the dialog. 
-
-Below is a detailed description on how to use this tool.  Let's get started!
+This is a language learning tool that allows you to role-play different characters in a target language of your choosing, a language you are trying to learn. Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with differentiated uses. The window on the left is where you have a conversation with the AI chatbot in the target language (this can be any language at all, Chinese, French, Hindi, Japanese, Persian, Portuguese, Spanish, Sanskrit.. your choice!). The window on the right allows you to ask questions about vocabulary, grammar, etc. in your native language (say English, or whatever language you are fluent in) without interrupting the flow of the roleplay dialog. You can also use the right window to adjust the difficulty level of the conversation, provide additional contextual information, and other "meta" comments or directions to influence the dialog. Below is a detailed description on how to use this tool.  Let's get started!
 
 To begin with, you will need to provide inputs in the configuration section at the top of the webpage:
 
@@ -14,11 +12,7 @@ The **Notes for AI** and **API Key** fields are optional.
 
 You can fill the **Notes for AI** like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
 
-**API Key** is required only if you don't have your local API set up. If you just want to test this out, you will need to insert your API key in here every time you restart the chat. To set-up your local API key, open the **server.py** file and locate this line of code: (at the beginning)
-
-- Have your **OPENAI_API_KEY.txt** contain your API key and place it in the same folder with your server.py file.
-
-![api_setup_1](static/images/readme/api_setup_1.png)
+**API Key** is required only if you don't have your local API set up. If you just want to test this out, you will need to insert your API key in here every time you restart the chat. To set-up your local API key, please refer to **Running Locally** at the bottom of the page for more instructions.
 
 Let's continue! This is just a sample.
 
@@ -76,7 +70,7 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
-Set up your local API keys by copying ```.env.example``` to ```env``` and filling in the values.
+Set up your local API keys by copying ```.env.example``` to ```.env``` and filling in the values.
 ```sh
 cp .env.example .env
 ```
