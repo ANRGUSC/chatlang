@@ -6,7 +6,6 @@ services:
     networks:
       - traefik_proxy
     environment:
-      - FLASK_ENV=production
       - PREFIX=/chatlang
       - ENABLE_GITHUB_LOGIN=true
     volumes:
