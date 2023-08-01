@@ -21,7 +21,7 @@ body {
 }
 #top-logo-text {
    font-size: 20px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
    padding: 0;
 }
 
@@ -33,7 +33,7 @@ body {
    width: 100%;
    padding-top: 30px;
    padding-bottom: 30px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
    color: white;
    background-color: #434345;
 }
@@ -56,7 +56,7 @@ body {
 }
 .config-input label {
    margin-right: 5px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .config-input input[type="text"] {
    padding-left: 10px;
@@ -66,7 +66,7 @@ body {
    border: 3px solid #5c5959;
    border-radius: 25px;
    background-color: #ededee;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 
 /* Language difficulty level selection */
@@ -75,10 +75,10 @@ select {
    background-color: #ededee;
    border-radius: 25px;
    height: 35px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .option-font {
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .config-input input[type="text"] {
    padding-left: 10px;
@@ -89,7 +89,7 @@ select {
    border: 3px solid #5c5959;
    border-radius: 25px;
    background-color: #ededee;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .config-input input[type="password"] {
    padding-left: 10px;
@@ -100,7 +100,7 @@ select {
    border: 3px solid #5c5959;
    border-radius: 25px;
    background-color: #ededee;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 
 /* Two buttons */
@@ -118,7 +118,7 @@ button.config-button {
    border: none;
    justify-content: center;
    background-color: transparent;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
    font-size: 30px;
    margin-top: 30px;
    margin-left: 30px;
@@ -168,7 +168,7 @@ button.config-button:hover {
    margin-bottom: 20px;
    padding: 7px;
    font-size: 18px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 
 /* Chat window style */
@@ -204,7 +204,7 @@ button.config-button:hover {
    border-radius: 25px;
    background-color: #434345;
    color: rgb(255, 255, 255);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .user-input input[type="text"]:focus {
    outline: none;
@@ -221,7 +221,7 @@ button.export-button {
    background-color: transparent;
    border: none;
    outline: none;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
    font-size: 15px;
 }
 button.export-button:hover {
@@ -236,13 +236,13 @@ button.export-button:hover {
    margin-left: 10px;
    margin-right: 3px;
    color: rgb(255, 255, 255);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .chat-box-header-message {
    text-align: center;
    margin-top: 10px;
    color: rgb(191, 195, 218);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .system-message {
    text-align: left;
@@ -251,7 +251,7 @@ button.export-button:hover {
    margin-left: 10px;
    margin-right: 3px;
    color: rgb(191, 195, 218);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 
 /* Bottom text */
@@ -266,7 +266,7 @@ button.export-button:hover {
 #bottom-text {
    text-align: center;
    font-size: 15px;
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 
 /* Href link embedded in text */
