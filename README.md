@@ -67,3 +67,16 @@ The left chat log only contains the role play chat. The right chat log will cont
 ![right_log_sample](static/images/readme/right_log_sample.png)
 
 There you go! Give it a try. We hope you like it!
+
+
+## Running Locally
+Install the requirements:
+
+```sh
+pip install -r requirements.txt
+```
+
+Set up your local API keys by copying ```.env.example``` to ```env``` and filling in the values.
+```sh
+cp .env.example .env
+```
