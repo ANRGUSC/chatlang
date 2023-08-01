@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Read Me</title>
+<link rel="icon" href="/static/images/anrgLogo.png" type="image/png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/css/readmestyle.css">
+</head>
+<body>
+   <div class="description-text-header">Welcome!</div>
+   
+   <div class="description-text">
+      This is a language learning tool that allows you to role-play different characters in a target language of your choosing, 
+      a language you are trying to learn. Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with differentiated uses. 
+      The window on the left is where you have a conversation with the AI chatbot in the target language 
+      (this can be any language at all, Chinese, French, Hindi, Japanese, Persian, Portugese, Spanish, Sanskrit.. your choice!). 
+      The window on the right allows you to ask questions about vocabulary, grammar, etc. in your native language (say English, or whatever language you are fluent in) 
+      without interrupting the flow of the roleplay dialog. You can also use the right window to adjust the difficulty level of the conversation, 
+      provide additional contextual information, and other "meta" comments or directions to influence the dialog.
+   </div>
+   <div class="description-text">Below is a detailed description on how to use this tool. Let's get started!</div>
+   <div class="description-text">To begin with, please fill out the configuration inputs required.</div>
+   <img class="demo-img" src="/static/images/readme/info_form_empty.png">
+   <!-- <div class="description-text">The <span class="description-text-bold">Notes for AI</span> and <span class="description-text-bold">API Key</span> fields are optional.</div> -->
+   <div class="description-text">The <span class="description-text-bold">Notes for AI</span> field is optional.</div>
+   <div class="description-text">
+      You can fill the <span class="description-text-bold">Notes for AI</span> like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
+   </div>
+   <!-- <div class="description-text">
+      <span class="description-text-bold">API Key</span> is required only if you don't have your local API set up. 
+      If you just want to test this out, you will need to insert your API key in here everytime you restart the chat.
+      To set-up your local API key, open the <span class="description-text-bold">server.py</span> file and locate this line of code: (at the beginning)
+   </div>
+   <div class="description-text">* Have your <span class="description-text-bold">OPENAI_API_KEY.txt</span> contain your API key and place it in the same folder with your server.py file.</div> -->
+   <!-- <img class="demo-img" src="/static/images/readme/api_setup_1.png"> -->
+   <div class="description-text">Let's continue! This is just a sample.</div>
+   <div class="description-text">* Please use proper and rational scenario settings e.g. customer & waiter in a restaurant. Otherwise, the AI may behave strangely.</div>
+   <img class="demo-img" src="/static/images/readme/info_form_filled.png">
+   <div class="description-text">Once thats's done. You can find those two buttons:</div>
+   <img class="demo-img" src="/static/images/readme/header_button.png">
+   <div class="description-text">
+      You can click the <span class="description-text-bold">Restart</span> button to reset the page. 
+      Click the <span class="description-text-bold">Let's Go!</span> button, you will see the two chat windows appear:
+   </div>
+   <div class="description-text">
+      The headers show your (user) role and the AI's role in each chat window.
+   </div>
+   <img class="demo-img-chat" src="/static/images/readme/chat_start.png">
+   <div class="description-text">
+      The window on the left is for you to have the conversation in your target language, the one you are learning (e.g., Chinese).
+   </div>
+   <div class="description-text">
+      The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. 
+      This can be in the language you already know (e.g., English).
+   </div>
+   <img class="demo-img-chat" src="/static/images/readme/chat_1.png">
+   <div class="description-text">
+      As you can see above, you can chat with the AI in the setting given on the left chat window. 
+      You can stop any time if you have a question and ask it on the right window. Let's continue:
+   </div>
+   <img class="demo-img-chat" src="/static/images/readme/chat_2.png">
+   <img class="demo-img-chat" src="/static/images/readme/chat_3.png">
+   <div class="description-text">
+      As you can see above, you can change your level anytime if you feel its too hard or too easy. There are three different levels: 
+      <span class="description-text-bold">Easy</span>, <span class="description-text-bold">Moderate</span>, and <span class="description-text-bold">Expert</span>.
+      You can change your level with <span class="description-text-bold">/level [desired level]</span> command.
+   </div>
+   <div class="description-text">
+      You can also add notes to the chatbot on the left window as extra information. To do that, use the <span class="description-text-bold">/system [notes]</span> handle.
+      This is an example:
+   </div>
+   <img class="demo-img-chat" src="/static/images/readme/chat_4.png">
+   <div class="description-text">
+      You can use the <span class="description-text-bold">/help</span> handle in case you forget how to use those instructions.
+   </div>
+   <img class="demo-img-chat" src="/static/images/readme/chat_5.png">
+   <div class="description-text">
+      Last but not least, you can export your chat log history any time you want by clicking the <span class="description-text-bold">Export Chat Log</span> button.
+      Your log history will be converted into a .txt file. Here are the two log history txt files of our demonstration above:
+   </div>
+   <div class="description-text">
+      The left chat log only contains the role play chat. The right chat log will contain all system instructions between the user and the system.
+   </div>
+   <img class="demo-img-log-1" src="/static/images/readme/left_log_sample.png">
+   <img class="demo-img-log-2" src="/static/images/readme/right_log_sample.png">
+   <div class="description-text">
+      There you go! Give it a try. We hope you like it!
+   </div>
+</body>
+</html>

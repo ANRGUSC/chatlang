@@ -9,14 +9,14 @@ body {
    width: 100%;
    font-size: 27px;
    color: rgb(251, 227, 204);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .description-text {
    width: 100%;
    font-size: 20px;
    margin-bottom: 10px;
    color: rgb(251, 227, 204);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .description-text-bold {
    width: 100%;
@@ -24,7 +24,7 @@ body {
    margin-bottom: 10px;
    font-weight: bold;
    color: rgb(219, 124, 124);
-   font-family: 'Pacifico', cursive;
+   font-family: 'Pacifico', sans-serif;
 }
 .demo-img {
    height: 100px;
