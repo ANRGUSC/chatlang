@@ -52,15 +52,13 @@ You can use the **/help** handle in case you forget how to use those instruction
 
 ![chat_5](static/images/readme/chat_5.png)
 
-Last but not least, you can export your chat log history any time you want by clicking the **Export Chat Log** button. Your log history will be converted into a .txt file. Here are the two log history txt files of our demonstration above:
+Last but not least, you can export your chat log history any time you want by clicking the Export Chat Log button. Your log history will be converted into a .txt file with an UID prefix:
 
 The left chat log only contains the role play chat. The right chat log will contain all system instructions between the user and the system.
 
 ![left_log_sample](static/images/readme/left_log_sample.png)
 
 ![right_log_sample](static/images/readme/right_log_sample.png)
-
-There you go! Give it a try. We hope you like it!
 
 
 ## Running Locally
@@ -74,3 +72,5 @@ Set up your local API keys by copying ```.env.example``` to ```.env``` and filli
 ```sh
 cp .env.example .env
 ```
+
+## There you have it! We hope you like it!
