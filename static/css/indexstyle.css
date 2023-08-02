@@ -38,6 +38,23 @@ body {
    background-color: #434345;
 }
 
+/* Tour button */
+button.tour-button {
+   position: relative;
+   bottom: -0.5px;
+   color: rgb(255, 142, 36);
+   background-color: transparent;
+   border: none;
+   outline: none;
+   font-size: 20.5px;
+   padding-left: 0px;
+   padding-right: 0px;
+   font-family: 'Pacifico', sans-serif;
+}
+button.tour-button:hover {
+   text-decoration: underline;
+}
+
 /* Configure window */
 .config-container {
    display: flex;
@@ -273,17 +290,16 @@ button.export-button:hover {
 .custom-link {
    color: rgb(255, 142, 36);
    text-decoration: none; 
- }
- .custom-link:hover {
+}
+.custom-link:hover {
    text-decoration: underline; 
- }
- 
- .custom-link:visited {
+}
+.custom-link:visited {
    color: rgb(255, 142, 36);
- }
+}
 
- 
- .login-container {
+/* Log in styles */
+.login-container {
    position: absolute;
    top: 50%;
    left: 50%;
