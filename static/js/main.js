@@ -471,6 +471,10 @@ function startTour() {
                "<br><br>You can also change language difficulty level and add additional notes for the chatbot. Type /help to find out more."
          },
          {
+            element: document.querySelector('#chatBox2'),
+            intro: "The chatbot will answer your questions like a language teacher. <br><br>All system messages will show in a different color.",
+         },
+         {
             element: document.querySelector('#export-button-1'),
             intro: "You can download your chat history anytime."
          },
