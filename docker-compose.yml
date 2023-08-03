@@ -1,26 +1,13 @@
 version: '3'
 services:
-  chatlang: 
+  chatlang-dev: 
     image: jaredraycoleman/chatlang:latest
     build: .
-    networks:
-      - traefik_proxy
     environment:
       - PREFIX=/chatlang
       - ENABLE_GITHUB_LOGIN=true
     volumes:
       - .env:/app/.env
-    # command: python3 /app/server.py\
+    ports:
+      - "5000:5000"
     command: gunicorn --bind 0.0.0.0:5000 server:app
-    deploy:
-      labels:
-        - "traefik.port=5000"
-        - "traefik.backend=chatlang"
-        - "traefik.frontend.rule=PathPrefix:/chatlang"
-      placement:
-        constraints:
-          - node.role == manager
-          
-networks:
-  traefik_proxy:
-    external: true
