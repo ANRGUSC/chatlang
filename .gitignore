@@ -13,7 +13,6 @@
 # Video file, mp4, audio
 *.rgb
 *.wav
-*.mp4
 *.csv
 *.json
 
