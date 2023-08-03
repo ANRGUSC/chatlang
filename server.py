@@ -18,6 +18,7 @@ PREFIX = os.getenv("PREFIX")
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 ENABLE_GITHUB_LOGIN = os.getenv("ENABLE_GITHUB_LOGIN")
+OUR_KEY_ALLOWED_MODELS = os.getenv("OUR_KEY_ALLOWED_MODELS", "gpt-3.5-turbo").split(",")
 
 SECRET_KEY = secrets.token_urlsafe(16)
 
@@ -84,6 +85,9 @@ def get_meta_response():
     user_message = request.get_json()['messages']
     user_api_key = request.get_json()['api']
     user_input_model = request.get_json()['model']
+
+    if user_input_model not in OUR_KEY_ALLOWED_MODELS:
+        return jsonify({'message': f'If you want to use {user_input_model}, you must provide your own key. We allow the following models without a key: {", ".join(OUR_KEY_ALLOWED_MODELS)}.'})
 
     # Set up API key:
     api_key = ""
