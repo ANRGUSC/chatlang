@@ -37,7 +37,7 @@ body {
    margin-bottom: 10px;
 }
 .demo-img-log-1 {
-   height: 300px;
+   height: 200px;
    width: auto;
    margin-bottom: 10px;
 }
@@ -46,8 +46,13 @@ body {
    width: auto;
    margin-bottom: 10px;
 }
-.demo-img-api {
-   height: 70px;
+.demo-img-api-1 {
+   height: 60px;
+   width: auto;
+   margin-bottom: 10px;
+}
+.demo-img-api-2 {
+   height: 56px;
    width: auto;
    margin-bottom: 10px;
 }

@@ -93,19 +93,46 @@ function setupConfig() {
    }
 }
 
-// Normalize user input to have first letter capitalized, and the rest all lower case:
-function normalizeString(input) {
-   input = input.toLowerCase();
-   return input.charAt(0).toUpperCase() + input.slice(1);
-}
-
-// When user click the "Restart" button:
+// When user clicks the "Restart" button:
 function resetConfig() {
    // Hide the two chat windows:
    $(".chat-box-container").css("visibility", "hidden");
 
    // Refresh page:
    window.location.reload();
+}
+
+// When user clicks the "Renew" button:
+function refreshConfig() {
+   // First clear all old arrays:
+   leftChatLog = new Array();
+   rightChatLog = new Array();
+   leftExportLog = new Array();
+   rightExportLog = new Array();
+   // Add initial log message in the export log arrays:
+   leftExportLog.push("This is the chat log history between " + userRole + " (user) and " + aiRole + " (AI) at the " + chatContext + " in " + chatLanguage + ".\n");
+   rightExportLog.push("This is the chat log history between Student (user) and Teacher (AI).\n");
+
+   // Second clear all variables to initial state:
+   prevLeftAssistantMessage = "";
+   leftCounter = 3; 
+   updatedLeftMessage = false; 
+
+   // Third, clean chat box and input content:
+   $('#chatBox1').empty();
+   $('#chatBox2').empty();
+   $('#inputBox1').empty();
+   $('#inputBox2').empty();
+
+   // Finally, add the initial message in each chat box:
+   $('#chatBox1').append(`<div class="chat-box-header-message">---Ready to chat---</div>`);
+   $('#chatBox2').append(`<div class="chat-box-header-message">---Type "/help" to see more instructions---</div>`);
+}
+
+// Normalize user input to have first letter capitalized, and the rest all lower case:
+function normalizeString(input) {
+   input = input.toLowerCase();
+   return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
 // Add user input message to chatbox:
@@ -152,7 +179,13 @@ function addSystemMessage(message, caseNumber) {
 
 // Enables the click/enter button function to input a message:
 function enterMessage(event, chatBoxNumber) {
-   if (event.keyCode === 13) {
+   // new line with shift + enter:
+   if (event.keyCode === 13 && event.shiftKey) {
+      if (event.type == "keypress") {
+         pasteIntoInput(this, "\n");
+      }
+      event.preventDefault();
+   } else if (event.keyCode === 13) {
       event.preventDefault();
       sendMessage(chatBoxNumber);
    }
@@ -479,8 +512,12 @@ function startTour() {
             intro: "You can download your chat history anytime."
          },
          {
+            element: document.querySelector('#refresh-button'),
+            intro: "You can clear your current chat history and restart it with the same Settings."
+         },
+         {
             element: document.querySelector('#restart-button'),
-            intro: "When you're done with the current chat, click here to restart everything!"
+            intro: "Wanna try something new? <br><br>You can reset everything!"
          }
       ]
    }).start();

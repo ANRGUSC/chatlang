@@ -75,7 +75,8 @@
    <!-- Two buttons -->
    <div class="button-container">
       <button class="config-button" id="start-button" form="info-form" onclick="setupConfig()">Let's Go!</button>
-      <button class="config-button" id="restart-button" onclick="resetConfig()">Restart</button>
+      <button class="config-button" id="refresh-button" onclick="refreshConfig()">Refresh Chat</button>
+      <button class="config-button" id="restart-button" onclick="resetConfig()">Start Over</button>
    </div>
 
    <!-- Here are the two chat windows with separate user input box right below each chat window -->
@@ -86,7 +87,7 @@
             <div class="chat-box-header-message">---Ready to chat---</div>
          </div>    
          <div class="user-input">
-            <input type="text" id="inputBox1" placeholder="Start chat anytime!" onkeypress="enterMessage(event, 1)">
+            <textarea type ="text" id="inputBox1" rows="3" placeholder="Start chat anytime!" onkeypress="enterMessage(event, 1)"></textarea>
          </div>
          <div class="export-button-container">
             <button class="export-button" id="export-button-1" onclick="generateLogFile(1)">Export Chat Log</button>
@@ -98,7 +99,7 @@
             <div class="chat-box-header-message">---Type "/help" to see more instructions---</div>
          </div>
          <div class="user-input">
-            <input type="text" id="inputBox2" placeholder="Ask questions in here!" onkeypress="enterMessage(event, 2)">
+            <textarea type ="text" id="inputBox2" rows="3" placeholder="Ask questions in here!" onkeypress="enterMessage(event, 2)"></textarea>
          </div>
          <div class="export-button-container">
             <button class="export-button" id="export-button-2" onclick="generateLogFile(2)">Export Chat Log</button>
