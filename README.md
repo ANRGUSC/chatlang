@@ -24,9 +24,9 @@ Once that's done. You can find these two buttons:
 
 ![header_button](static/images/readme/header_button.png)
 
-You can click the **Restart** button to reset the page. Click the **Let's Go!** button, and you will see the two chat windows appear:
+**Refresh Chat** clears the current chat history and starts a new chat under the same settings. **Start Over** allows you reset everything.
 
-The headers show your (user) role and the AI's role in each chat window.
+Click the **Let's Go!** button, you will see the two chat windows appear. The headers show your (user) role and the AI's role in each chat window.
 
 ![chat_start](static/images/readme/chat_start.png)
 
