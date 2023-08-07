@@ -191,7 +191,7 @@ def get_tutor_response():
     messages = [
         {
             "role": "system",
-            "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice on how to improve."
+            "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice (in English) on how to improve."
         },
         {
             "role": "user",
