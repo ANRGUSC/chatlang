@@ -13,10 +13,10 @@ var rightExportLog = new Array();
 let leftSystemConfig = "";
 let levelSuffix = "";
 let rightSystemConfig = "You're a language teacher. The user is your student and he/she will ask you various language-related questions based on the references possibly given. " +
-                        "Please provide concise and informative responses, keeping each reply simple, direct and not lengthy. Always keep your role and that of the user in mind.";
-let easySuffix = "Please provide short and simple replies, keeping each reply to only one sentence in entry level vocabulary and grammar."; 
-let moderateSuffix = "Please provide short replies, keeping each reply to only one sentence in intermediate level vocabulary and grammar.";   
-let expertSuffix = "Please provice concise and creative replies, keeping each reply to no more than three sentences in high-level vocabulary and grammar."; 
+   "Please provide concise and informative responses, keeping each reply simple, direct and not lengthy. Always keep your role and that of the user in mind.";
+let easySuffix = "Please provide short and simple replies, keeping each reply to only one sentence in entry level vocabulary and grammar.";
+let moderateSuffix = "Please provide short replies, keeping each reply to only one sentence in intermediate level vocabulary and grammar.";
+let expertSuffix = "Please provice concise and creative replies, keeping each reply to no more than three sentences in high-level vocabulary and grammar.";
 
 // Counter to remind the left assistant to stick with the current difficulty level:
 let leftCounter = 3; // remind it per three rounds of conversation
@@ -48,8 +48,8 @@ function setupConfig() {
    userModel = $("#chat-model").val();
 
    // Show chat windows:
-   if (!configClicked && userRole.replace(/\s/g, "") != "" 
-      && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" && chatLanguage.replace(/\s/g, "") 
+   if (!configClicked && userRole.replace(/\s/g, "") != ""
+      && aiRole.replace(/\s/g, "") != "" && chatContext.replace(/\s/g, "") != "" && chatLanguage.replace(/\s/g, "")
       && chatLevel.replace(/\s/g, "") != "" && userModel.replace(/\s/g, "") != "") {
       // disable all input box once "Let's Go!" is clicked:
       $("#user-role").prop("disabled", true);
@@ -86,7 +86,7 @@ function setupConfig() {
       // Add initial log message in the export log arrays:
       leftExportLog.push("This is the chat log history between " + userRole + " (user) and " + aiRole + " (AI) at the " + chatContext + " in " + chatLanguage + ".\n");
       rightExportLog.push("This is the chat log history between Student (user) and Teacher (AI).\n");
-      
+
       // show chat windows:
       configClicked = true;
       $(".chat-box-container").css("visibility", "visible");
@@ -131,7 +131,7 @@ function addAssistantMessage(message, chatBoxNumber) {
       message = "Teacher: " + message;
    }
    $(chatBoxId).append(`<div class="message">${message}</div>`);
-   
+
    // Auto scroll to the bottom:
    $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
 }
@@ -222,9 +222,9 @@ function sendMessage(chatBoxNumber) {
                   levelSuffix = expertSuffix;
                }
                if (leftChatLog.length === 0) {
-                  updateLog(1, {'role': 'system', 'content': leftSystemConfig +  " " + levelSuffix});
+                  updateLog(1, { 'role': 'system', 'content': leftSystemConfig + " " + levelSuffix });
                } else {
-                  updateLog(1, {'role': 'system', 'content': "From now on, in the following conversation, " + levelSuffix});
+                  updateLog(1, { 'role': 'system', 'content': "From now on, in the following conversation, " + levelSuffix });
                }
             }
          } else {
@@ -235,7 +235,7 @@ function sendMessage(chatBoxNumber) {
          // Get system message:
          var newSystemMessage = userInput.substring(userInput.indexOf("/system ") + "/system ".length);
          // Add new system message to left log history:
-         updateLog(1, {'role': 'system', 'content': newSystemMessage});
+         updateLog(1, { 'role': 'system', 'content': newSystemMessage });
          addSystemMessage("System message: \"" + newSystemMessage + "\" has been successfully configured.", 1);
          rightExportLog.push(getCurrentTime() + "SYSTEM: " + "System message: \"" + newSystemMessage + "\" has been successfully configured.");
       } else {
@@ -260,16 +260,50 @@ function sendMessage(chatBoxNumber) {
       // current_url + /static/images/loading.gif
       $(chatBoxId).append(`<div class="loading"><img id="loading-logo" src="static/images/loading.gif"></div>`);
       $(chatBoxId).scrollTop($(chatBoxId)[0].scrollHeight);
-
       // Build the message from history log:
       var messages = buildMessage(chatBoxNumber, userInput);   // get it from history log
-      let payload = {'api': userAPIKey, 'model': userModel, 'messages': messages};  // payload include gpt model, api-key, and messages
 
+      if (chatBoxNumber == 1) {
+         $.ajax({
+            type: 'POST',
+            url: 'api/tutor',
+            contentType: 'application/json',
+            data: JSON.stringify({
+               'api': userAPIKey,
+               'model': userModel,
+               // messages from chatBox 1
+               'rp_messages': leftChatLog,
+               // messages from chatBox 2
+               'tutor_messages': rightChatLog
+            }),
+            success: function (response) {
+               var tutorReply = response;
+
+               console.log(tutorReply);
+               console.log(tutorReply.advice);
+
+               // if tutorReply.advice is not empty, then we need to add it to the right chatbox
+               if (tutorReply.advice != "") {
+                  correction = tutorReply.correction;
+                  advice = tutorReply.advice;
+                  console.log('Add advice to right chatbox');
+                  updateLog(2, { 'role': 'assistant', 'content': correction + ". " + advice });
+                  rightExportLog.push(getCurrentTime() + "TUTOR: " + correction + ". " + advice);
+                  
+                  addAssistantMessage("[" + correction + "] " + advice, 2);
+               }
+            },
+            error: function (error) {
+               console.log(error);
+            }
+         });
+      }
+      
+      let payload = { 'api': userAPIKey, 'model': userModel, 'messages': messages };  // payload include gpt model, api-key, and messages
       // Execute ajax call:
       $.ajax({
          type: 'POST',
-         // url: '/chatlanguagelearning/chat',  // change to this one when deploy on server
-         url: 'chatlanguagelearning/chat',  
+         url: 'api/chat',
          contentType: 'application/json',
          data: JSON.stringify(payload),
          success: function (response) {
@@ -284,7 +318,7 @@ function sendMessage(chatBoxNumber) {
                updatedLeftMessage = true; // now we can get this assistant message add to the right window system message as a reference
                prevLeftAssistantMessage = assistantReply;   // update this value
             }
-            updateLog(chatBoxNumber, {'role': 'assistant', 'content': assistantReply});
+            updateLog(chatBoxNumber, { 'role': 'assistant', 'content': assistantReply });
 
             // Add assistant reply to log history for export:
             if (chatBoxNumber == 1) {
@@ -299,7 +333,7 @@ function sendMessage(chatBoxNumber) {
             leftCounter--;
             if (leftCounter === 0) {
                leftCounter = 3;
-               updateLog(1, {'role': 'system', 'content': levelSuffix});
+               updateLog(1, { 'role': 'system', 'content': levelSuffix });
             }
          },
          error: function (error) {
@@ -312,11 +346,11 @@ function sendMessage(chatBoxNumber) {
 // Build the payload messages from log history:
 function buildMessage(chatBoxNumber, userInput) {
    var messages = new Array();
-   
+
    // Add history log messages:
    if (chatBoxNumber === 1) {
       if (leftChatLog.length === 0) {
-         updateLog(chatBoxNumber, {'role': 'system', 'content': leftSystemConfig + " " + levelSuffix});
+         updateLog(chatBoxNumber, { 'role': 'system', 'content': leftSystemConfig + " " + levelSuffix });
       }
       // Add all history log into message:
       for (var i = 0; i < leftChatLog.length; i++) {
@@ -324,12 +358,12 @@ function buildMessage(chatBoxNumber, userInput) {
       }
    } else {
       if (rightChatLog.length === 0) {
-         updateLog(chatBoxNumber, {'role': 'system', 'content': rightSystemConfig});
-      } 
+         updateLog(chatBoxNumber, { 'role': 'system', 'content': rightSystemConfig });
+      }
       // Avoid repeat system message:
       if (prevLeftAssistantMessage.replace(/\s/g, "") != "" && updatedLeftMessage) {
          updatedLeftMessage = false;
-         updateLog(chatBoxNumber, {'role': 'system', 'content': 'Answer student question based on this: ' + prevLeftAssistantMessage});
+         updateLog(chatBoxNumber, { 'role': 'system', 'content': 'Answer student question based on this: ' + prevLeftAssistantMessage });
       }
       // Add all history log into message:
       for (var i = 0; i < rightChatLog.length; i++) {
@@ -338,8 +372,8 @@ function buildMessage(chatBoxNumber, userInput) {
    }
 
    // Add the new user input message, and update this into the correct log:
-   messages.push({'role': 'user', 'content': userInput}); // add user input message
-   updateLog(chatBoxNumber, {'role': 'user', 'content': userInput});
+   messages.push({ 'role': 'user', 'content': userInput }); // add user input message
+   updateLog(chatBoxNumber, { 'role': 'user', 'content': userInput });
    return messages;
 }
 
@@ -386,9 +420,9 @@ function generateLogFile(chatBoxNumber) {
    // one line per chat history
    let chatLog = "";
    if (chatBoxNumber === 1) {
-      chatLog = leftExportLog.join("\n"); 
+      chatLog = leftExportLog.join("\n");
    } else {
-      chatLog = rightExportLog.join("\n"); 
+      chatLog = rightExportLog.join("\n");
    }
 
    const blob = new Blob([chatLog], { type: "text/plain" });
@@ -416,7 +450,7 @@ function startTour() {
       steps: [
          {
             intro: "Welcome!<br><br>This is a language learning tool that allows you to role-play different characters in a target language of your choosing.<br><br>Let's get started!"
-         }, 
+         },
          {
             element: document.querySelector('#info-form'),
             intro: "This is the configuration section. Here, you can set information about the role-playing scenario."
@@ -432,7 +466,7 @@ function startTour() {
          {
             element: document.querySelector('#user-role'),
             intro: "Pick your role, e.g., Customer."
-         },{
+         }, {
             element: document.querySelector('#chat-language'),
             intro: "Pick the language you want to learn. <br><br>Please refer to: <a class='custom-link' href='https://acutrans.com/languages-supported-by-chatgpt/' target='_blank'>supported languages</a>."
          },
