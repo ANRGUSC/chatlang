@@ -26,7 +26,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
                             <a class="nav-link {{ 'active' if request.path == url_for('chatlang.index') }}"
                                 href="{{ url_for('chatlang.index') }}">Home</a>
@@ -39,9 +39,39 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="https://forms.gle/UrfEPhhZ1A7Dyayv6">Submit Feedback</a>
+                        </li>
                     </ul>
-                    <div class="d-flex" id="btn-tour">
-                        <button class="btn btn-outline-dark" onclick="startTour()">Tour</button>
+                    <div class="d-flex">
+                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                            <li class="nav-item me-2 mb-2 mb-md-0" id="btn-tour">
+                                <button class="btn btn-outline-dark" onclick="startTour()">Tour</button>
+                            </li>
+                            <li class="nav-item">
+                                {% if g.current_user %}
+                                    <!-- account dropdown with logout and Account Info options -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-dark dropdown-toggle" type="button"
+                                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Account
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                                            <li><a class="dropdown-item" href="{{ url_for('chatlang.user') }}">Account
+                                                    Info</a></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li><a class="dropdown-item" href="{{ url_for('chatlang.auth0.logout') }}">Logout</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <a type="button" class="btn btn-outline-dark"
+                                        href="{{ url_for('chatlang.auth0.login') }}">
+                                        Login
+                                    </a>
+                                {% endif %}
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>

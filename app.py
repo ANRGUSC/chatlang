@@ -1,19 +1,18 @@
 import json
 import os
 import secrets
+import traceback
 from typing import Dict, List, Tuple, Optional
-from dotenv import load_dotenv
-from flask import Blueprint, Flask, redirect, render_template, request, jsonify, url_for
+from flask import redirect, render_template, request, jsonify, url_for
 from flask_wtf import FlaskForm
 import openai
 from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
-import logging
 
-app = Flask(__name__)
-load_dotenv()
+from app_base import app, bp
+from app_oauth import auth0_bp, requires_auth, get_app_metadata
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ["OPENAI_ORG_ID"]
@@ -27,7 +26,6 @@ if not SECRET_KEY and FLASK_ENV != "production":
 
 app.config['SECRET_KEY'] = SECRET_KEY
 
-bp = Blueprint('chatlang', __name__, url_prefix=PREFIX, static_folder='static', static_url_path='/static')
 thisdir = pathlib.Path(__file__).parent.absolute()
 
 class APIException(Exception):
@@ -62,13 +60,18 @@ def get_model() -> str:
     return model
 
 def get_api_key() -> Tuple[str, Optional[str]]:
-    api_key = (request.json or {}).get('api_key') or OPENAI_API_KEY
+    api_key = get_app_metadata().get('api_key') or OPENAI_API_KEY
     if not api_key:
         raise APIException("OPENAI API key is required.", status_code=403)
     org_id = None
     if api_key == OPENAI_API_KEY:
         org_id = OPENAI_ORG_ID
+    else:
+        print("Using custom API key")
     return api_key, org_id
+
+def get_tutor_language() -> str:
+    return get_app_metadata().get('tutor_language') or 'English'
 
 messages_schema = {
     "type": "array",
@@ -94,8 +97,6 @@ def index():
             'language': form.language.data,
             'difficulty': form.difficulty.data,
             'notes_for_ai': form.notes_for_ai.data,
-            'tutor_language': form.tutor_language.data,
-            'api_key': form.api_key.data
         }
         return redirect(url_for('chatlang.chat_page', **query))
     return render_template('index.html', form=form)
@@ -110,6 +111,7 @@ def chat():
 
     model = get_model()
     api_key, org_id = get_api_key()
+    tutor_language: str = get_tutor_language()
     openai.api_key = api_key
     if org_id:
         openai.organization = OPENAI_ORG_ID
@@ -122,113 +124,118 @@ def chat():
         language: str = request_json['language']
         difficulty: str = request_json['difficulty']
         notes_for_ai: str = request_json['notes_for_ai']
-        tutor_language: str = request_json['tutor_language']
     except KeyError as e:
         raise APIException(f"Missing required key: {e.args[0]}", status_code=400)
     
-    if bot_type == 'rp':
-        # Proactive error correction
-        functions = [
-            {
-                "name": "get_tutor_response",
-                "description": " ".join([
-                    "Get the tutor's advice for the user's last message in a conversation",
-                    "The tutor corrects spelling and grammar mistakes, and provides advice on how to improve.",
-                    "If the sentence is correct, the tutor will say so."
-                ]),
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "correction": {
-                            "type": "string",
-                            "description": "The corrected version of the user's last message. If the user's message is correct, this is the same as the user's message."
+    try:
+        if bot_type == 'rp':
+            # Proactive error correction
+            functions = [
+                {
+                    "name": "get_tutor_response",
+                    "description": " ".join([
+                        "Get the tutor's advice for the user's last message in a conversation",
+                        "The tutor corrects spelling and grammar mistakes, and provides advice on how to improve.",
+                        "If the sentence is correct, the tutor will say so."
+                    ]),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "correction": {
+                                "type": "string",
+                                "description": "The corrected version of the user's last message. If the user's message is correct, this is the same as the user's message."
+                            },
+                            "advice": {
+                                "type": "string",
+                                "description": "The tutor's advice for the user's last message. If the user's message is correct, this is an empty string."
+                            }
                         },
-                        "advice": {
-                            "type": "string",
-                            "description": "The tutor's advice for the user's last message. If the user's message is correct, this is an empty string."
-                        }
-                    },
-                    "required": ["correction", "advice"],
+                        "required": ["correction", "advice"],
+                    }
                 }
-            }
-        ]
-        messages = [
-            {
-                "role": "system",
-                # "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice (in English) on how to improve."
-                "content": (
-                    f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                    f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
-                    f"The scenario is {scenario}. "
-                    f"You are a tutor that is monitoring the AI chatbot and the user. "
-                    f"Correct the learner's mistakes and provide advice (in {tutor_language}) on how to improve."
-                )
-            },
-            {
-                "role": "user",
-                "content": (
-                    "Tutor/User conversation history:\n"
-                    f"{tutor_history}\n\n"
-                    "User conversation with AI assistant:\n"
-                    f"{rp_history}"
-                )
-            }
-        ]
+            ]
+            messages = [
+                {
+                    "role": "system",
+                    # "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice (in English) on how to improve."
+                    "content": (
+                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
+                        f"The scenario is {scenario}. "
+                        f"You are a tutor that is monitoring the AI chatbot and the user. "
+                        f"Correct the learner's mistakes and provide advice (in {tutor_language}) on how to improve."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Tutor/User conversation history:\n"
+                        f"{tutor_history}\n\n"
+                        "User conversation with AI assistant:\n"
+                        f"{rp_history}"
+                    )
+                }
+            ]
 
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            functions=functions,
-            function_call={"name": "get_tutor_response"}
-        )
-        response_message = response["choices"][0]["message"]
-        function_args = json.loads(response_message["function_call"]["arguments"])
-        tutor_response = ''
-        if function_args['advice'].strip():
-            tutor_response = f"[{function_args['correction']}] {function_args['advice']}"
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=messages,
+                functions=functions,
+                function_call={"name": "get_tutor_response"}
+            )
+            response_message = response["choices"][0]["message"]
+            function_args = json.loads(response_message["function_call"]["arguments"])
+            tutor_response = ''
+            if function_args['advice'].strip():
+                tutor_response = f"[{function_args['correction']}] {function_args['advice']}"
 
-        # Role-play response
-        messages = [
-            {
-                'role': 'system', 
-                'content': (
-                    "You are an AI chatbot that will role-play with the user for them to practice their language skills. "
-                    f"Your role is {ai_role} and the user's role is {your_role}. "
-                    f"The scenario is {scenario}. "
-                    f"The target language is {language}. Do not use any other languages and do not break character. "
-                    f"Use {difficulty} level language. "
-                    "" if not notes_for_ai else f"Notes: {notes_for_ai}"
-                )
-            },
-            *[{'role': m['role'], 'content': m['content']} for m in rp_history],
-        ]
+            # Role-play response
+            messages = [
+                {
+                    'role': 'system', 
+                    'content': (
+                        "You are an AI chatbot that will role-play with the user for them to practice their language skills. "
+                        f"Your role is {ai_role} and the user's role is {your_role}. "
+                        f"The scenario is {scenario}. "
+                        f"The target language is {language}. Do not use any other languages and do not break character. "
+                        f"Use {difficulty} level language. "
+                        "" if not notes_for_ai else f"Notes: {notes_for_ai}"
+                    )
+                },
+                *[{'role': m['role'], 'content': m['content']} for m in rp_history],
+            ]
 
-        response = openai.ChatCompletion.create(model=model, messages=messages)
-        response_message = response.choices[0]['message']['content']
-        return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
-    else:
-        rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history])
-        messages = [
-            {
-                'role': 'system',
-                'content': (
-                    f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                    f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
-                    f"The scenario is {scenario}. "
-                    f"You are a tutor that is monitoring the AI chatbot and the user. "
-                    f"When the user asks you a question, you should answer it in their native language {tutor_language}. "
-                    f"The user may ask you questions about the conversation (i.e. what words/settings mean), how to say something in the target language, etc. "
-                    f""
-                    f"This is the conversation history so far:\n" + rp_convo
-                )
-            },
-            *[{'role': m['role'], 'content': m['content']} for m in tutor_history],
-        ]
+            response = openai.ChatCompletion.create(model=model, messages=messages)
+            response_message = response.choices[0]['message']['content']
+            return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
+        else:
+            rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history])
+            messages = [
+                {
+                    'role': 'system',
+                    'content': (
+                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
+                        f"The scenario is {scenario}. "
+                        f"You are a tutor that is monitoring the AI chatbot and the user. "
+                        f"When the user asks you a question, you should answer it in their native language {tutor_language}. "
+                        f"The user may ask you questions about the conversation (i.e. what words/settings mean), how to say something in the target language, etc. "
+                        f""
+                        f"This is the conversation history so far:\n" + rp_convo
+                    )
+                },
+                *[{'role': m['role'], 'content': m['content']} for m in tutor_history],
+            ]
 
-        openai.api_key = api_key
-        response = openai.ChatCompletion.create(model=model, messages=messages)
-        response_message = response.choices[0]['message']['content']
-        return jsonify({'tutor_response': response_message})
+            openai.api_key = api_key
+            response = openai.ChatCompletion.create(model=model, messages=messages)
+            response_message = response.choices[0]['message']['content']
+            return jsonify({'tutor_response': response_message})
+    except openai.error.AuthenticationError as e:
+        raise APIException("Invalid API key. Check your account settings.", status_code=401)
+    except Exception as e:
+        traceback.print_exc()
+        raise APIException("Unknown error. Please submit feedback.", status_code=400)
 
 @bp.route('/chat', methods=['GET'])
 def chat_page():
