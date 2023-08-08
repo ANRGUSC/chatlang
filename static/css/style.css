@@ -1,0 +1,61 @@
+.bubble {
+    display: inline-block;
+    /* This will make the div only as wide as its content */
+    max-width: 80%;
+}
+
+.message-user {
+    display: flex;
+    justify-content: flex-end; /* This will push the content to the bottom */
+}
+
+/* .message-container {
+    height: 50vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+} */
+.message-container {
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+    margin: 0px;
+    padding: 10px;
+}
+
+pre {
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    margin-top: auto;
+    border-top: 1px solid #ccc;
+}
+
+.grayscale {
+    filter: grayscale(100%);
+}

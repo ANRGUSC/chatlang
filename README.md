@@ -69,6 +69,7 @@ pip install -r requirements.txt
 ```
 
 Set up your local API keys by copying ```.env.example``` to ```.env``` and filling in the values.
+
 ```sh
 cp .env.example .env
 ```

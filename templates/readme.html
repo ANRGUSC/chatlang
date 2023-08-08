@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('chatlang.static', filename='css/readmestyle.css') }}">
+
 {% endblock %}
 
 {% block content %}
-   <div class="description-text-header">Welcome!</div>
+   <h1 class="title">Role Play Chat Language Learning</h1>
+   <p class="lead text-center">Manual, Guide, and Demo</p>
 
-   <div class="description-text">
+   <p>
       This is a language learning tool that allows you to role-play different characters in a target language of your choosing, 
       a language you are trying to learn. Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with differentiated uses. 
       The window on the left is where you have a conversation with the AI chatbot in the target language 
@@ -15,82 +16,80 @@
       The window on the right allows you to ask questions about vocabulary, grammar, etc. in your native language (say English, or whatever language you are fluent in) 
       without interrupting the flow of the roleplay dialog. You can also use the right window to adjust the difficulty level of the conversation, 
       provide additional contextual information, and other "meta" comments or directions to influence the dialog. Below is a detailed description on how to use this tool. Let's get started!
-   </div>
-   <div class="description-text"><br>To begin with, you will need to provide inputs in the configuration section at the top of the webpage:</div>
-   <img class="demo-img" src="{{ url_for('chatlang.static', filename='images/readme/info_form_empty.png') }}">
-   <div class="description-text">The <span class="description-text-bold">Notes for AI</span> and <span class="description-text-bold">API Key</span> fields are optional.</div>
-   <div class="description-text">
-      You can fill the <span class="description-text-bold">Notes for AI</span> like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
-   </div>
-   <div class="description-text">
-      <span class="description-text-bold">API Key</span> is required only if you don't have your local API set up. 
+   </p>
+   <p><br>To begin with, you will need to provide inputs in the configuration section at the top of the webpage:</p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/info_form_empty.png') }}">
+   <p>The <b>Notes for AI</b> and <b>API Key</b> fields are optional.</p>
+   <p>
+      You can fill the <b>Notes for AI</b> like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
+   </p>
+   <p>
+      <b>API Key</b> is required only if you don't have your local API set up. 
       If you just want to test this out, you will need to insert your API key in here every time you restart the chat. 
-      To set-up your local API key, please refer to <span class="description-text-bold">Running Locally</span> at the bottom of the page for more instructions.
-   </div>
-   <div class="description-text">Let's continue! This is just a sample.</div>
-   <div class="description-text">* Please use proper and rational scenario settings e.g. customer & waiter in a restaurant. Otherwise, the AI may behave strangely.</div>
-   <img class="demo-img" src="{{ url_for('chatlang.static', filename='images/readme/info_form_filled.png') }}">
-   <div class="description-text">Once thats's done. You can find those two buttons:</div>
-   <img class="demo-img" src="{{ url_for('chatlang.static', filename='images/readme/header_button.png') }}">
-   <div class="description-text">
-      <span class="description-text-bold">Refresh Chat</span> clears the current chat history and starts a new chat under the same settings. 
-      <span class="description-text-bold">Start Over</span> allows you reset everything. 
-   </div>
-   <div class="description-text">
-      Click the <span class="description-text-bold">Let's Go!</span> button, you will see the two chat windows appear. The headers show your (user) role and the AI's role in each chat window.
-   </div>
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_start.png') }}">
-   <div class="description-text">
+      To set-up your local API key, please refer to <b>Running Locally</b> at the bottom of the page for more instructions.
+   </p>
+   <p>Let's continue! This is just a sample.</p>
+   <p>* Please use proper and rational scenario settings e.g. customer & waiter in a restaurant. Otherwise, the AI may behave strangely.</p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/info_form_filled.png') }}">
+   <p>Once that's done. You can find those two buttons:</p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/header_button.png') }}">
+   <p>
+      <b>Refresh Chat</b> clears the current chat history and starts a new chat under the same settings. 
+      <b>Start Over</b> allows you to reset everything. 
+   </p>
+   <p>
+      Click the <b>Let's Go!</b> button, you will see the two chat windows appear. The headers show your (user) role and the AI's role in each chat window.
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_start.png') }}">
+   <p>
       The window on the left is for you to have the conversation in your target language, the one you are learning (e.g., Chinese).
-   </div>
-   <div class="description-text">
+   </p>
+   <p>
       The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. 
       This can be in the language you already know (e.g., English).
-   </div>
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_1.png') }}">
-   <div class="description-text">
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_1.png') }}">
+   <p>
       As you can see above, you can chat with the AI in the setting given on the left chat window. 
-      You can stop any time if you have a question and ask it on the right window. Let's continue:
-   </div>
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_2.png') }}">
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_3.png') }}">
-   <div class="description-text">
-      As you can see above, you can change your level anytime if you feel its too hard or too easy. There are three different levels: 
-      <span class="description-text-bold">Easy</span>, <span class="description-text-bold">Moderate</span>, and <span class="description-text-bold">Expert</span>.
-      You can change your level with <span class="description-text-bold">/level [desired level]</span> command.
-   </div>
-   <div class="description-text">
-      You can also add notes to the chatbot on the left window as extra information. To do that, use the <span class="description-text-bold">/system [notes]</span> handle.
+      You can stop at any time if you have a question and ask it on the right window. Let's continue:
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_2.png') }}">
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_3.png') }}">
+   <p>
+      As you can see above, you can change your level anytime if you feel it's too hard or too easy. There are three different levels: 
+      <b>Easy</b>, <b>Moderate</b>, and <b>Expert</b>.
+      You can change your level with <b>/level [desired level]</b> command.
+   </p>
+   <p>
+      You can also add notes to the chatbot on the left window as extra information. To do that, use the <b>/system [notes]</b> handle.
       This is an example:
-   </div>
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_4.png') }}">
-   <div class="description-text">
-      You can use the <span class="description-text-bold">/help</span> handle in case you forget how to use those instructions.
-   </div>
-   <img class="demo-img-chat" src="{{ url_for('chatlang.static', filename='images/readme/chat_5.png') }}">
-   <div class="description-text">
-      Last but not least, you can export your chat log history any time you want by clicking the <span class="description-text-bold">Export Chat Log</span> button.
-      Your log history will be converted into a .txt file with an UID prefix:
-   </div>
-   <div class="description-text">
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_4.png') }}">
+   <p>
+      You can use the <b>/help</b> handle in case you forget how to use those instructions.
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/chat_5.png') }}">
+   <p>
+      Last but not least, you can export your chat log history anytime you want by clicking the <b>Export Chat Log</b> button.
+      Your log history will be converted into a .txt file with a UID prefix:
+   </p>
+   <p>
       The left chat log only contains the role play chat. The right chat log will contain all system instructions between the user and the system.
-   </div>
-   <img class="demo-img-log-1" src="{{ url_for('chatlang.static', filename='images/readme/left_log_sample.png') }}">
-   <img class="demo-img-log-2" src="{{ url_for('chatlang.static', filename='images/readme/right_log_sample.png') }}">
+   </p>
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/left_log_sample.png') }}">
+   <img style="width: 100%;" src="{{ url_for('chatlang.static', filename='images/readme/right_log_sample.png') }}">
 
-   <div class="description-text-header" id="running-locally"><br>Running Locally</div>
-   <div class="description-text">
+   <p class="description-text-header" id="running-locally"><br>Running Locally</p>
+   <p>
       Install the requirements:
-   </div>
-   <img class="demo-img-api-1" src="{{ url_for('chatlang.static', filename='images/readme/api_setup_1.png') }}">
-   <div class="description-text">
-      Set up your local API keys by copying <span class="description-text-bold">.env.example</span> to <span class="description-text-bold">.env</span> and filling in the values.
-   </div>
-   <img class="demo-img-api-2" src="{{ url_for('chatlang.static', filename='images/readme/api_setup_2.png') }}">
+   </p>
+   <pre><code class="language-bash">pip install -r requirements.txt</code></pre>
+   <p>
+      Set up your local API keys by copying <b>.env.example</b> to <b>.env</b> and filling in the values.
+   </p>
+   <pre><code class="language-bash">pip install -r requirements.txt</code></pre>
 
-   <div class="description-text">
-      <br>There you have it! We hope you like it!<br><br><br>
-   </div>
+   <p><br>cp<br><br><br></p>
 
 {% endblock %}
 
