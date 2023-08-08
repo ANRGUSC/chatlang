@@ -1,16 +1,16 @@
 import json
 import os
 import secrets
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 from dotenv import load_dotenv
 from flask import Blueprint, Flask, redirect, render_template, request, jsonify, url_for
 from flask_wtf import FlaskForm
 import openai
 from wtforms import StringField, SelectField, TextAreaField
-from wtforms.validators import Optional
-import jsonschema
+from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
+import logging
 
 app = Flask(__name__)
 load_dotenv()
@@ -18,9 +18,6 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ["OPENAI_ORG_ID"]
 PREFIX = os.getenv("PREFIX")
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
-GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
-ENABLE_GITHUB_LOGIN = os.getenv("ENABLE_GITHUB_LOGIN")
 OUR_KEY_ALLOWED_MODELS = os.getenv("OUR_KEY_ALLOWED_MODELS", "gpt-3.5-turbo").split(",")
 SECRET_KEY = os.getenv("SECRET_KEY")
 FLASK_ENV = os.getenv("FLASK_ENV")
@@ -48,28 +45,30 @@ def handle_api_exception(error):
     return response
 
 class ChatSettingsForm(FlaskForm):
-    scenario = StringField('Scenario', validators=[Optional()])
-    ai_role = StringField('AI Role', validators=[Optional()])
-    your_role = StringField('Your Role', validators=[Optional()])
-    language = StringField('Language', validators=[Optional()])
+    scenario = StringField('Scenario', validators=[OptionalValidator()])
+    ai_role = StringField('AI Role', validators=[OptionalValidator()])
+    your_role = StringField('Your Role', validators=[OptionalValidator()])
+    language = StringField('Language', validators=[OptionalValidator()])
     difficulty = SelectField('Difficulty', choices=[('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')])
     api_model = SelectField('API Model', choices=[('gpt-3.5-turbo', 'gpt-3.5-turbo'), ('gpt-4', 'gpt-4')])
-    notes_for_ai = TextAreaField('Notes for AI', validators=[Optional()])
-    api_key = StringField('API Key', validators=[Optional()])
-    tutor_language = StringField('Tutor Language', validators=[Optional()])
+    notes_for_ai = TextAreaField('Notes for AI', validators=[OptionalValidator()])
+    api_key = StringField('API Key', validators=[OptionalValidator()])
+    tutor_language = StringField('Tutor Language', validators=[OptionalValidator()])
 
 def get_model() -> str:
-    print(request.json)
     model = (request.json or {}).get('api_model')
     if model not in OUR_KEY_ALLOWED_MODELS:
         raise APIException(f"Model {model} is not allowed.", status_code=403)
     return model
 
-def get_api_key() -> str:
+def get_api_key() -> Tuple[str, Optional[str]]:
     api_key = (request.json or {}).get('api_key') or OPENAI_API_KEY
     if not api_key:
         raise APIException("OPENAI API key is required.", status_code=403)
-    return api_key
+    org_id = None
+    if api_key == OPENAI_API_KEY:
+        org_id = OPENAI_ORG_ID
+    return api_key, org_id
 
 messages_schema = {
     "type": "array",
@@ -99,7 +98,7 @@ def index():
             'api_key': form.api_key.data
         }
         return redirect(url_for('chatlang.chat_page', **query))
-    return render_template('main.html', form=form)
+    return render_template('index.html', form=form)
 
 @bp.route('/api/chat', methods=['POST'])
 def chat():
@@ -110,7 +109,10 @@ def chat():
     request_json: Dict = request.json
 
     model = get_model()
-    api_key = get_api_key()
+    api_key, org_id = get_api_key()
+    openai.api_key = api_key
+    if org_id:
+        openai.organization = OPENAI_ORG_ID
     try:
         rp_history: List[Dict[str, str]] = request_json['rp_history']
         tutor_history: List[Dict[str, str]] = request_json['tutor_history']
@@ -121,7 +123,6 @@ def chat():
         difficulty: str = request_json['difficulty']
         notes_for_ai: str = request_json['notes_for_ai']
         tutor_language: str = request_json['tutor_language']
-        api_key: str = request_json['api_key']
     except KeyError as e:
         raise APIException(f"Missing required key: {e.args[0]}", status_code=400)
     
@@ -173,6 +174,7 @@ def chat():
                 )
             }
         ]
+
         response = openai.ChatCompletion.create(
             model=model,
             messages=messages,
@@ -201,7 +203,7 @@ def chat():
             *[{'role': m['role'], 'content': m['content']} for m in rp_history],
         ]
 
-        response = openai.ChatCompletion.create(model=model, messages=messages, api_key=api_key)
+        response = openai.ChatCompletion.create(model=model, messages=messages)
         response_message = response.choices[0]['message']['content']
         return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
     else:
@@ -223,7 +225,8 @@ def chat():
             *[{'role': m['role'], 'content': m['content']} for m in tutor_history],
         ]
 
-        response = openai.ChatCompletion.create(model=model, messages=messages, api_key=api_key)
+        openai.api_key = api_key
+        response = openai.ChatCompletion.create(model=model, messages=messages)
         response_message = response.choices[0]['message']['content']
         return jsonify({'tutor_response': response_message})
 
@@ -242,4 +245,4 @@ def about_page():
 app.register_blueprint(bp)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

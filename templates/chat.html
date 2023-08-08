@@ -61,13 +61,13 @@
 
 <!-- reset chat button by reloading the page -->
 <div class="row">
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-6 mb-1">
         <button class="btn btn-outline-dark w-100" type="button" id="button-addon-reset"
             onclick="exportChat();">
             Export Chat
         </button>
     </div>
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-6 mb-1">
         <button class="btn btn-outline-danger w-100" type="button" id="button-addon-reset"
             onclick="window.location.reload();">
             Reset Chat
@@ -77,7 +77,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/tour-chat.js') }}"></script>
+<script src="{{ url_for('chatlang.static', filename='js/tour-chat.js') }}"></script>
 <script>
     function renderMessage(role, content, timestamp) {
         const background = role == 'user' ? 'bg-primary' : 'bg-light';
@@ -180,7 +180,8 @@
 
         // Make API call with query parameters
         $.ajax({
-            url: '/api/chat?bot=' + bot,
+            // url: '/api/chat?bot=' + bot,
+            url: `{{ url_for("chatlang.chat") }}?bot=${bot}`,
             type: 'POST',
             data: JSON.stringify(payload),
             contentType: 'application/json',

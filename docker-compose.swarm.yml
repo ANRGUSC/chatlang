@@ -7,10 +7,11 @@ services:
       - traefik_proxy
     environment:
       - PREFIX=/chatlang
-      - ENABLE_GITHUB_LOGIN=true
+      - FLASK_ENV=production
     volumes:
       - .env:/app/.env
-    command: gunicorn --bind 0.0.0.0:5000 server:app
+    command: gunicorn --bind 0.0.0.0:5000 --env FLASK_ENV=production --env PREFIX=/chatlang app:app
+    # command: python app.py
     deploy:
       labels:
         - "traefik.port=5000"

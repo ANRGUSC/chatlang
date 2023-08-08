@@ -16,4 +16,4 @@ ADD . /app
 EXPOSE 80
 
 # Run gunicorn when the container launches
-CMD ["gunicorn", "server:app", "-b", "0.0.0.0:80"]
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80"]

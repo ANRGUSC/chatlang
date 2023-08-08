@@ -5,9 +5,9 @@ services:
     build: .
     environment:
       - PREFIX=/chatlang
-      - ENABLE_GITHUB_LOGIN=true
     volumes:
       - .env:/app/.env
     ports:
       - "5000:5000"
-    command: gunicorn --bind 0.0.0.0:5000 server:app
+    # command: gunicorn --bind 0.0.0.0:5000 app:app
+    command: python app.py
