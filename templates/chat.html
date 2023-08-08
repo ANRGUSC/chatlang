@@ -64,6 +64,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/tour-chat.js') }}"></script>
 <script>
     function renderMessage(role, content, timestamp) {
         const background = role == 'user' ? 'bg-primary' : 'bg-light';
