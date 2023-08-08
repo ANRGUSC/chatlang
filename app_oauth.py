@@ -130,7 +130,7 @@ def get_app_metadata():
     if 'profile' not in session:
         return {}
     auth0_mgmt_api = Auth0(AUTH0_DOMAIN, get_management_api_token())
-    return auth0_mgmt_api.users.get(session['profile']['sub'])['app_metadata']
+    return auth0_mgmt_api.users.get(session['profile']['sub']).get('app_metadata', {})
 
 @auth0_bp.route('/delete_account', methods=['POST'])
 def delete_account():
