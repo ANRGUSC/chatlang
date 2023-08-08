@@ -10,6 +10,7 @@ from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app_base import app, bp
 from app_oauth import auth0_bp, requires_auth, get_app_metadata
@@ -56,7 +57,7 @@ class ChatSettingsForm(FlaskForm):
 def get_model() -> str:
     model = (request.json or {}).get('api_model')
     if model not in OUR_KEY_ALLOWED_MODELS:
-        raise APIException(f"Model {model} is not allowed.", status_code=403)
+        raise APIException(f"Model {model} is not allowed unless you use your own API key. Check your Account Settings.", status_code=403)
     return model
 
 def get_api_key() -> Tuple[str, Optional[str]]:
@@ -177,6 +178,7 @@ def chat():
                 }
             ]
 
+            print("Proactive Messages: ", messages)
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -204,12 +206,17 @@ def chat():
                 },
                 *[{'role': m['role'], 'content': m['content']} for m in rp_history],
             ]
+            print("Roleplay Messages: ", messages)
 
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
             return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
         else:
-            rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history])
+            # rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history])
+            # tutor_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in tutor_history])
+            
+            # for each user message in tutor_history, get all rp_history messages that came before it
+
             messages = [
                 {
                     'role': 'system',
@@ -220,13 +227,35 @@ def chat():
                         f"You are a tutor that is monitoring the AI chatbot and the user. "
                         f"When the user asks you a question, you should answer it in their native language {tutor_language}. "
                         f"The user may ask you questions about the conversation (i.e. what words/settings mean), how to say something in the target language, etc. "
-                        f""
-                        f"This is the conversation history so far:\n" + rp_convo
                     )
-                },
-                *[{'role': m['role'], 'content': m['content']} for m in tutor_history],
+                }
             ]
-
+            tutor_user_messages = [m for m in tutor_history if m['role'] == 'user']
+            tutor_assistant_messages = [m for m in tutor_history if m['role'] == 'assistant']
+            for tutor_user_message in tutor_user_messages:
+                rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history if m['timestamp'] <= tutor_user_message['timestamp']])
+                
+                messages.append({
+                    'role': 'user',
+                    'content': (
+                        f"User conversation with AI assistant:\n"
+                        f"{rp_convo}\n\n"
+                        f"{tutor_user_message['content']}"
+                    )
+                })
+                
+                tutor_response = None
+                for tutor_assistant_message in tutor_assistant_messages:
+                    if tutor_assistant_message['timestamp'] > tutor_user_message['timestamp']:
+                        tutor_response = tutor_assistant_message['content']
+                        break
+                if tutor_response is not None:
+                    messages.append({
+                        'role': 'assistant',
+                        'content': tutor_response
+                    })
+                
+            print("Tutor Messages: ", messages)
             openai.api_key = api_key
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']

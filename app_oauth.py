@@ -67,7 +67,7 @@ def callback_handling():
     session['access_token'] = resp['access_token']
     user_info = Users(AUTH0_DOMAIN).userinfo(session['access_token'])
     session['profile'] = user_info
-    return redirect('/')
+    return redirect(url_for('chatlang.index'))
 
 @auth0_bp.route('/logout')
 def logout():
