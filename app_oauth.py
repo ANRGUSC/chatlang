@@ -48,7 +48,6 @@ def requires_auth(f):
 @bp.before_request
 def before_request():
     g.current_user = session.get('profile', None)
-    print(f"current_user: {g.current_user}")
 
 @auth0_bp.route('/login')
 def login():
@@ -83,7 +82,6 @@ class UserProfileForm(FlaskForm):
 @bp.route('/user', methods=['GET', 'POST'])
 @requires_auth
 def user():
-    print(session['profile'])
     error_message, success_message = None, None
     form = UserProfileForm()
     if request.method == 'GET':

@@ -1,16 +1,19 @@
 import json
+import logging
 import os
 import secrets
 import traceback
 from typing import Dict, List, Tuple, Optional
-from flask import redirect, render_template, request, jsonify, url_for
+from flask import redirect, render_template, request, jsonify, session, url_for
 from flask_wtf import FlaskForm
 import openai
 from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
-from werkzeug.middleware.proxy_fix import ProxyFix
+
+from flask_limiter import Limiter, RateLimitExceeded
+from flask_limiter.util import get_remote_address
 
 from app_base import app, bp
 from app_oauth import auth0_bp, requires_auth, get_app_metadata
@@ -28,6 +31,32 @@ if not SECRET_KEY and FLASK_ENV != "production":
 app.config['SECRET_KEY'] = SECRET_KEY
 
 thisdir = pathlib.Path(__file__).parent.absolute()
+
+global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global')
+api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'))
+
+# exempt users where get_api_key() != OPENAI_API_KEY
+@api_key_limiter.request_filter
+def api_key_limiter_filter():
+    api_key, _ = get_api_key()
+    return api_key != OPENAI_API_KEY
+
+@global_api_key_limiter.request_filter
+def global_api_key_limiter_filter():
+    api_key, _ = get_api_key()
+    return api_key != OPENAI_API_KEY
+
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_error(e: RateLimitExceeded):
+    response = jsonify(
+        error="ratelimit exceeded", 
+        message=(
+            f"When using the default API key, your messages are limited to: {e.description}. "
+            "Add your own OpenAI API key in your Account Settings to remove these limits."
+        )
+    )
+    response.status_code = 429
+    return response
 
 class APIException(Exception):
     """Raised when the API returns an error.
@@ -68,7 +97,7 @@ def get_api_key() -> Tuple[str, Optional[str]]:
     if api_key == OPENAI_API_KEY:
         org_id = OPENAI_ORG_ID
     else:
-        print("Using custom API key")
+        logging.info("Using custom API key")
     return api_key, org_id
 
 def get_tutor_language() -> str:
@@ -102,7 +131,11 @@ def index():
         return redirect(url_for('chatlang.chat_page', **query))
     return render_template('index.html', form=form)
 
+# use default limiter for this route
 @bp.route('/api/chat', methods=['POST'])
+# @global_api_key_limiter.limit("1000 per day")
+# @api_key_limiter.limit("10 per minute;100 per day")
+@api_key_limiter.limit("1 per day")
 def chat():
     bot_type = request.args.get('bot')
 
@@ -178,7 +211,6 @@ def chat():
                 }
             ]
 
-            print("Proactive Messages: ", messages)
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -206,7 +238,6 @@ def chat():
                 },
                 *[{'role': m['role'], 'content': m['content']} for m in rp_history],
             ]
-            print("Roleplay Messages: ", messages)
 
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
@@ -255,7 +286,6 @@ def chat():
                         'content': tutor_response
                     })
                 
-            print("Tutor Messages: ", messages)
             openai.api_key = api_key
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
