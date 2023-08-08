@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-center my-4">Role Play Chat Language Learning</h1>
-
-
 <div id="chat-windows" class="my-4">
     <ul class="nav nav-tabs d-md-none" role="tablist">
         <li class="nav-item" role="presentation">
@@ -61,6 +58,22 @@
         </div>
     </div>
 </div>
+
+<!-- reset chat button by reloading the page -->
+<div class="row">
+    <div class="col-12 col-md-6">
+        <button class="btn btn-outline-dark w-100" type="button" id="button-addon-reset"
+            onclick="exportChat();">
+            Export Chat
+        </button>
+    </div>
+    <div class="col-12 col-md-6">
+        <button class="btn btn-outline-danger w-100" type="button" id="button-addon-reset"
+            onclick="window.location.reload();">
+            Reset Chat
+        </button>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -76,6 +89,50 @@
             </div>
         </div>
         `;
+    }
+
+    function resetChat() {
+        sessionStorage.removeItem('rp_history');
+        sessionStorage.removeItem('tutor_history');
+    }
+
+    function exportChat() {
+        var rp_history = JSON.parse(sessionStorage.getItem('rp_history')) || [];
+        var tutor_history = JSON.parse(sessionStorage.getItem('tutor_history')) || [];
+        // get settings from query string
+        var settings = window.location.search.substring(1).split('&');
+        var settings_dict = {};
+        for (var i = 0; i < settings.length; i++) {
+            var pair = settings[i].split('=');
+            settings_dict[pair[0]] = pair[1];
+        }
+
+        var rp_chat = '';
+        var tutor_chat = '';
+
+        for (var i = 0; i < rp_history.length; i++) {
+            rp_chat += rp_history[i].timestamp + ' ' + rp_history[i].role + ': ' + rp_history[i].content + '\n';
+        }
+
+        for (var i = 0; i < tutor_history.length; i++) {
+            tutor_chat += tutor_history[i].timestamp + ' ' + tutor_history[i].role + ': ' + tutor_history[i].content + '\n';
+        }
+
+        var rp_blob = new Blob([rp_chat], { type: "text/plain;charset=utf-8" });
+        var tutor_blob = new Blob([tutor_chat], { type: "text/plain;charset=utf-8" });
+        var settings_blob = new Blob([JSON.stringify(settings_dict)], { type: "text/plain;charset=utf-8" });
+
+        var zip = new JSZip();
+        zip.file("rp_chat.txt", rp_blob);
+        zip.file("tutor_chat.txt", tutor_blob);
+        zip.file("settings.json", settings_blob);
+
+        zip.generateAsync({ type: "blob" })
+            .then(function (content) {
+                // save with timestamp in name
+                saveAs(content, `chat_${new Date().getTime()}.zip`);
+            });
+
     }
 
     // Get chat config from query string
@@ -182,7 +239,7 @@
 
     $(document).ready(function () {
         console.log('document ready');
-        sessionStorage.clear();
+        resetChat();
         updateDisplay();
     });
 
