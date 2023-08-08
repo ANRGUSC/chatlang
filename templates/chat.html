@@ -91,6 +91,16 @@
         `;
     }
 
+    function renderErrorMessage(content, timestamp) {
+        return `
+        <div class="message message-error">
+            <div class="bubble bg-danger text-white p-2 rounded">
+                <i class="fas fa-exclamation-triangle"></i> ${content}
+            </div>
+        </div>
+        `;
+    }
+
     function resetChat() {
         sessionStorage.removeItem('rp_history');
         sessionStorage.removeItem('tutor_history');
@@ -201,6 +211,16 @@
                     $('#tutor-chat-window').append(renderMessage('assistant', data.tutor_response, timestamp));
                     // scroll to bottom of messages window
                     $('#tutor-chat-window').scrollTop($('#tutor-chat-window').prop('scrollHeight'));
+                }
+            },
+            error: function (xhr, status, error) {
+                chatWindow.find('.message-system').remove();
+                var timestamp = new Date().toLocaleTimeString();
+                try {
+                    var errorJson = JSON.parse(xhr.responseText);
+                    chatWindow.append(renderErrorMessage(errorJson.message, timestamp));
+                } catch (e) {
+                    chatWindow.append(renderErrorMessage(xhr.responseText, timestamp));
                 }
             }
         });
