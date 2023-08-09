@@ -9,13 +9,10 @@
     justify-content: flex-end; /* This will push the content to the bottom */
 }
 
-/* .message-container {
-    height: 50vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; 
-} */
+.message {
+    padding-top: 5px;
+}
+
 .message-container {
     height: 50vh;
     display: flex;

@@ -1,19 +1,23 @@
 import json
+import logging
 import os
 import secrets
 import traceback
 from typing import Dict, List, Tuple, Optional
-from flask import redirect, render_template, request, jsonify, url_for
+from flask import redirect, render_template, request, jsonify, session, url_for
 from flask_wtf import FlaskForm
 import openai
 from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
-from werkzeug.middleware.proxy_fix import ProxyFix
+from redis import Redis
+import sys
+
+from flask_limiter import Limiter, RateLimitExceeded
 
 from app_base import app, bp
-from app_oauth import auth0_bp, requires_auth, get_app_metadata
+from app_oauth import get_app_metadata
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ["OPENAI_ORG_ID"]
@@ -28,6 +32,36 @@ if not SECRET_KEY and FLASK_ENV != "production":
 app.config['SECRET_KEY'] = SECRET_KEY
 
 thisdir = pathlib.Path(__file__).parent.absolute()
+
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL:
+    redis_conn = Redis.from_url(REDIS_URL)
+
+global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global', storage_uri=REDIS_URL if REDIS_URL else None)
+api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'), storage_uri=REDIS_URL if REDIS_URL else None)
+
+# exempt users where get_api_key() != OPENAI_API_KEY
+@api_key_limiter.request_filter
+def api_key_limiter_filter():
+    api_key, _ = get_api_key()
+    return api_key != OPENAI_API_KEY
+
+@global_api_key_limiter.request_filter
+def global_api_key_limiter_filter():
+    api_key, _ = get_api_key()
+    return api_key != OPENAI_API_KEY
+
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_error(e: RateLimitExceeded):
+    response = jsonify(
+        error="ratelimit exceeded", 
+        message=(
+            f"When using the default API key, your messages are limited to: {e.description}. "
+            "Add your own OpenAI API key in your Account Settings to remove these limits."
+        )
+    )
+    response.status_code = 429
+    return response
 
 class APIException(Exception):
     """Raised when the API returns an error.
@@ -68,7 +102,7 @@ def get_api_key() -> Tuple[str, Optional[str]]:
     if api_key == OPENAI_API_KEY:
         org_id = OPENAI_ORG_ID
     else:
-        print("Using custom API key")
+        logging.info("Using custom API key")
     return api_key, org_id
 
 def get_tutor_language() -> str:
@@ -102,7 +136,10 @@ def index():
         return redirect(url_for('chatlang.chat_page', **query))
     return render_template('index.html', form=form)
 
+# use default limiter for this route
 @bp.route('/api/chat', methods=['POST'])
+@global_api_key_limiter.limit("500 per day")
+@api_key_limiter.limit("20 per day")
 def chat():
     bot_type = request.args.get('bot')
 
@@ -134,21 +171,17 @@ def chat():
             functions = [
                 {
                     "name": "get_tutor_response",
-                    "description": " ".join([
-                        "Get the tutor's advice for the user's last message in a conversation",
-                        "The tutor corrects spelling and grammar mistakes, and provides advice on how to improve.",
-                        "If the sentence is correct, the tutor will say so."
-                    ]),
+                    "description": "Get the tutor correction and advice for the user's last message.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "correction": {
                                 "type": "string",
-                                "description": "The corrected version of the user's last message. If the user's message is correct, this is the same as the user's message."
+                                "description": "The corrected version of the user's last message. Empty string if the user's message is correct."
                             },
                             "advice": {
                                 "type": "string",
-                                "description": "The tutor's advice for the user's last message. If the user's message is correct, this is an empty string."
+                                "description": "The tutor's advice for the user's last message. Empty string if the user's message is correct."
                             }
                         },
                         "required": ["correction", "advice"],
@@ -158,13 +191,11 @@ def chat():
             messages = [
                 {
                     "role": "system",
-                    # "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice (in English) on how to improve."
                     "content": (
                         f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}. "
                         f"The scenario is {scenario}. "
                         f"You are a tutor that is monitoring the AI chatbot and the user. "
-                        f"Correct the learner's mistakes and provide advice (in {tutor_language}) on how to improve."
                     )
                 },
                 {
@@ -173,12 +204,15 @@ def chat():
                         "Tutor/User conversation history:\n"
                         f"{tutor_history}\n\n"
                         "User conversation with AI assistant:\n"
-                        f"{rp_history}"
+                        f"{rp_history}\n\n"
+                        f"If the user made a mistake in their last message, "
+                        f"correct their mistake and give them advice (in their native language {tutor_language}) on how to improve. "
+                        f"If they made no mistake, give no advice (empty string)."
                     )
                 }
             ]
 
-            print("Proactive Messages: ", messages)
+            logging.info(f"RP correction messages: {messages}")
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -206,8 +240,8 @@ def chat():
                 },
                 *[{'role': m['role'], 'content': m['content']} for m in rp_history],
             ]
-            print("Roleplay Messages: ", messages)
 
+            logging.info(f"RP response messages: {messages}")
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
             return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
@@ -230,6 +264,8 @@ def chat():
                     )
                 }
             ]
+
+            logging.info(f"Tutor messages: {messages}")
             tutor_user_messages = [m for m in tutor_history if m['role'] == 'user']
             tutor_assistant_messages = [m for m in tutor_history if m['role'] == 'assistant']
             for tutor_user_message in tutor_user_messages:
@@ -255,7 +291,6 @@ def chat():
                         'content': tutor_response
                     })
                 
-            print("Tutor Messages: ", messages)
             openai.api_key = api_key
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
@@ -281,4 +316,5 @@ def about_page():
 app.register_blueprint(bp)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     app.run(debug=True, host='0.0.0.0', port=5000)
