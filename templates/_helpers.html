@@ -1,0 +1,33 @@
+{% macro render_field(field, placeholder='') %}
+  <div class="form-group">
+    {{ field.label }}
+    {{ field(class="form-control", placeholder=placeholder) }}
+    {% if field.errors %}
+      {% for error in field.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_message(role, content, timestamp) %}
+{% if role=='asistant' %}
+<div class="message message-user">
+  <div class="bubble bg-primary text-white p-2 rounded">
+    {{ content }}
+  </div>
+</div>
+{% elif role=='user' %}
+<div class="message message-assistant">
+  <div class="bubble bg-light text-dark p-2 rounded">
+    {{ content }}
+  </div>
+</div>
+{% else %} <!-- role=='system' -->
+<div class="message message-system">
+  <div class="bubble bg-light text-dark p-2 rounded">
+    {{ content }}
+  </div>
+</div>
+{% endif %}
+{% endmacro %}

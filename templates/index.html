@@ -1,118 +1,29 @@
 {% extends "base.html" %}
-
-{% block head %}
-   <link rel="stylesheet" href="{{ url_for('chatlang.static', filename='css/indexstyle.css') }}">
-   <link rel="stylesheet" href="https://unpkg.com/intro.js/introjs.css">
-{% endblock %}
+{% from "_helpers.html" import render_field %}
 
 {% block content %}
-   <!-- Top logo and text -->
-   <div class="top-logo">
-      <a id="angr-top" href="https://anrg.usc.edu/www/" target="_blank">
-         <img id="angr-top" src="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}">
-      </a>
-      <div id="top-logo-text">Role Play Chat for Language Learning</div>
-      <!-- right justified logout button -->
-      <div class="logout-container">
-         <a href="{{ url_for('chatlang.logout') }}" class="logout-button">Log Out</a>
-      </div>
-   </div>
+<h1 class="text-center my-4">Role Play Chat Language Learning</h1>
+<p class="lead text-center">This is a demo of the Role Play Chat Language Learning system. Please fill out the form below to get started.</p>
 
-   <!-- Brief description and link to read me & submit feedback -->
-   <div class="top-description">
-      First time? We've got you covered! Try out <button class="tour-button" onclick="startTour()">this tour</button> or 
-      click <a href="{{ url_for('chatlang.read_me_page') }}" class="custom-link" target="_blank">here</a> for more detailed instructions. 
-      Have issues? Leave us feedback in <a href="https://forms.gle/UrfEPhhZ1A7Dyayv6" class="custom-link" target="_blank">here</a>.
-   </div>
-
-   <!-- This is the Prompt for user to enter role -->
-   <form class="config-container" id="info-form" onsubmit="return false">
-      <div class="config-input">
-         <label for="chat-context">Scenario: </label>
-         <input type="text" id="chat-context" placeholder="e.g., Restaurant" required>
-      </div>
-      <div class="config-input">
-         <label for="ai-role">AI Role: </label>
-         <input type="text" id="ai-role" placeholder="e.g., Waiter" required>
-      </div>
-      <div class="config-input">
-         <label for="user-role">Your Role: </label>
-         <input type="text" id="user-role" placeholder="e.g., Customer" required>
-      </div>
-      <div class="config-input">
-         <label for="chat-language">Chat Language: </label>
-         <input type="text" id="chat-language" placeholder="e.g., French" required>
-      </div>
-      <div class="config-input">
-         <label for="chat-level">Difficulty Level: </label>
-         <select id="chat-level" required>
-            <option value="" class="option-font">Select Level</option>
-            <option value="Easy" class="option-font">Easy</option>
-            <option value="Moderate" class="option-font">Moderate</option>
-            <option value="Expert" class="option-font">Expert</option>
-         </select>
-      </div>
-      <div class="config-input">
-         <label for="chat-model">API Model: </label>
-         <select id="chat-model" required>   
-            <option value="" class="option-font">Select Model</option>
-            <option value="gpt-4" class="option-font">gpt-4</option>
-            <option value="gpt-4-32k" class="option-font">gpt-4-32k</option>
-            <option value="gpt-3.5-turbo" class="option-font">gpt-3.5-turbo</option>
-            <option value="gpt-3.5-turbo-16k" class="option-font">gpt-3.5-turbo-16k</option>
-         </select>
-      </div>
-      <div class="config-input">
-         <label for="system-context">Notes for AI (Optional): </label>
-         <input type="text" id="system-context" placeholder="e.g., Today is a rainy day.">
-      </div>
-      <div class="config-input">
-         <label for="user-api-key">API Key (Optional): </label>
-         <input type="password" id="user-api-key" placeholder="">
-      </div>
-   </form>
-
-   <!-- Two buttons -->
-   <div class="button-container">
-      <button class="config-button" id="start-button" form="info-form" onclick="setupConfig()">Let's Go!</button>
-      <button class="config-button" id="refresh-button" onclick="refreshConfig()">Refresh Chat</button>
-      <button class="config-button" id="restart-button" onclick="resetConfig()">Start Over</button>
-   </div>
-
-   <!-- Here are the two chat windows with separate user input box right below each chat window -->
-   <div class="chat-box-container">
-      <div class="window" id="window-1">
-         <div class="chat-window-header" id="main-chat-window-header"></div>
-         <div class="chat-box" id="chatBox1">
-            <div class="chat-box-header-message">---Ready to chat---</div>
-         </div>    
-         <div class="user-input">
-            <textarea type ="text" id="inputBox1" rows="3" placeholder="Start chat anytime!" onkeypress="enterMessage(event, 1)"></textarea>
-         </div>
-         <div class="export-button-container">
-            <button class="export-button" id="export-button-1" onclick="generateLogFile(1)">Export Chat Log</button>
-         </div>
-      </div>
-      <div class="window" id="window-2">
-         <div class="chat-window-header">Chat for Student (user) & Teacher (AI)</div>
-         <div class="chat-box" id="chatBox2">
-            <div class="chat-box-header-message">---Type "/help" to see more instructions---</div>
-         </div>
-         <div class="user-input">
-            <textarea type ="text" id="inputBox2" rows="3" placeholder="Ask questions in here!" onkeypress="enterMessage(event, 2)"></textarea>
-         </div>
-         <div class="export-button-container">
-            <button class="export-button" id="export-button-2" onclick="generateLogFile(2)">Export Chat Log</button>
-         </div>
-      </div>
-   </div>
-
-   <div class="bottom-container">
-      <p id="bottom-text">(c) 2023, <a href="https://anrg.usc.edu/www/" class="custom-link" target="_blank">Autonomous Networks Research Group</a>, University of Southern California, All Rights Reserved.</p>
-   </div>
+<form id="settings-form" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-md-4">{{ render_field(form.scenario, placeholder="e.g. Restaurant") }}</div>
+        <div class="col-md-4">{{ render_field(form.ai_role, placeholder="e.g. Waiter") }}</div>
+        <div class="col-md-4">{{ render_field(form.your_role, placeholder="e.g. Customer") }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">{{ render_field(form.language, placeholder="e.g. French") }}</div>
+        <div class="col-md-4">{{ render_field(form.difficulty) }}</div>
+        <div class="col-md-4">{{ render_field(form.api_model) }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">{{ render_field(form.notes_for_ai, placeholder="e.g. today is a rainy day") }}</div>
+    </div>
+    <button type="submit" class="btn btn-primary w-100 mt-2" id="btn-new-conversation">New Conversation</button>
+</form>
 {% endblock %}
 
 {% block scripts %}
-   <script type="text/javascript" src="{{ url_for('chatlang.static', filename='js/main.js') }}"></script>
-   <script type="text/javascript" src="https://unpkg.com/intro.js/intro.js"></script>
+<script src="{{ url_for('chatlang.static', filename='js/tour-index.js') }}"></script>
 {% endblock %}

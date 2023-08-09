@@ -1,16 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-   <title>Role Play Chat Language Learning</title>
-   <link rel="icon" href="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}" type="image/png">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   {% block head %}{% endblock %}
+    <title>Role Play Chat Language Learning</title>
+    <link rel="icon" href="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/introjs.css">
+    <link rel="stylesheet" href="{{ url_for('chatlang.static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block head %}{% endblock %}
 </head>
-<body>
 
-    {% block content %}{% endblock %}
+<body class="d-none">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('chatlang.index') }}">Chatlang</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == url_for('chatlang.index') }}"
+                                href="{{ url_for('chatlang.index') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == url_for('chatlang.about_page') }}"
+                                href="{{ url_for('chatlang.about_page') }}">
+                                About
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://forms.gle/UrfEPhhZ1A7Dyayv6">Submit Feedback</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                            <li class="nav-item me-2 mb-2 mb-md-0" id="btn-tour">
+                                <button class="btn btn-outline-dark" onclick="startTour()">Tour</button>
+                            </li>
+                            <li class="nav-item">
+                                {% if g.current_user %}
+                                    <!-- account dropdown with logout and Account Info options -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-dark dropdown-toggle" type="button"
+                                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Account
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                                            <li><a class="dropdown-item" href="{{ url_for('chatlang.user') }}">Account
+                                                    Info</a></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li><a class="dropdown-item" href="{{ url_for('chatlang.auth0.logout') }}">Logout</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <a type="button" class="btn btn-outline-dark"
+                                        href="{{ url_for('chatlang.auth0.login') }}">
+                                        Login
+                                    </a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
-    {% block scripts %}{% endblock %}
+    <main>
+        <div class="container mb-2">
+            <div class="row">
+                <div class="col-md-12">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto">
+        <div class="container-fluid py-2 d-flex justify-content-between align-items-center">
+            <a href="https://anrg.usc.edu">
+                <img src="{{ url_for('chatlang.static', filename='images/anrgLogo.png') }}" alt="ANRG" width="60"
+                    height="60" class="d-inline-block align-text-top">
+            </a>
+            <p class="text-muted mb-0 text-center">© 2023 Autonomous Networks Research Group</p>
+            <a href="https://github.com/ANRGUSC/chatLanguageLearning" class="grayscale">
+                <i class="fab fa-github fa-2x"></i>
+            </a>
+        </div>
+    </footer>
+
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://unpkg.com/intro.js/intro.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {% block scripts %}
+    {% endblock %}
+    <script>
+        // if startTour is not defined, add d-none class to tour button
+        if (typeof startTour === 'undefined') {
+            document.getElementById("btn-tour").classList.add("d-none");
+        }
+
+        // only display page after everything is loaded
+        $(window).on('load', function () {
+            $('body').removeClass('d-none');
+        });
+    </script>
 </body>
+
 </html>

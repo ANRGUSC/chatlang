@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="chat-windows" class="my-4">
+    <ul class="nav nav-tabs d-md-none" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="rp-tab" data-bs-toggle="tab" data-bs-target="#rp-tab-content"
+                type="button" role="tab" aria-controls="rp-tab-content" aria-selected="true">
+                Conversation
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor-tab-content"
+                type="button" role="tab" aria-controls="tutor-tab-content" aria-selected="false">
+                Tutor
+            </button>
+        </li>
+    </ul>
+
+    <div class="row tab-content" id="tab-content">
+        <div class="col-12 col-md-6 tab-pane fade show active" id="rp-tab-content" role="tabpanel"
+            aria-labelledby="rp-tab">
+            <div class="card" id="rp-card">
+                <div class="card-header d-none d-md-block">Conversation</div>
+                <div class="card-body message-container justify-content-end">
+                    <div class="messages" id="rp-chat-window"></div>
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input type="text" id="rp-input" class="form-control" placeholder="Type a message..."
+                            aria-label="message" aria-describedby="button-addon-send">
+                        <button class="btn btn-outline-dark" type="button" id="button-addon-send-rp"
+                            onclick="sendMessage('rp', 'rp-input', 'rp-chat-window')">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 tab-pane fade" id="tutor-tab-content" role="tabpanel" aria-labelledby="tutor-tab">
+            <div class="card" id="tutor-card">
+                <div class="card-header d-none d-md-block">Tutor</div>
+                <div class="card-body message-container justify-content-end">
+                    <div class="messages" id="tutor-chat-window"></div>
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input type="text" id="tutor-input" class="form-control" placeholder="Type a message..."
+                            aria-label="message" aria-describedby="button-addon-send">
+                        <button class="btn btn-outline-dark" type="button" id="button-addon-send-tutor"
+                            onclick="sendMessage('tutor', 'tutor-input', 'tutor-chat-window')">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- reset chat button by reloading the page -->
+<div class="row">
+    <div class="col-12 col-md-6 mb-1">
+        <button class="btn btn-outline-dark w-100" type="button" id="button-addon-reset"
+            onclick="exportChat();">
+            Export Chat
+        </button>
+    </div>
+    <div class="col-12 col-md-6 mb-1">
+        <button class="btn btn-outline-danger w-100" type="button" id="button-addon-reset"
+            onclick="window.location.reload();">
+            Reset Chat
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('chatlang.static', filename='js/tour-chat.js') }}"></script>
+<script>
+    function renderMessage(role, content, timestamp) {
+        const background = role == 'user' ? 'bg-primary' : 'bg-light';
+        const textColor = role == 'user' ? 'text-white' : 'text-dark';
+        return `
+        <div class="message message-${role}">
+            <div class="bubble ${background} ${textColor} p-2 rounded">
+                ${content}
+            </div>
+        </div>
+        `;
+    }
+
+    function renderErrorMessage(content, timestamp) {
+        return `
+        <div class="message message-error">
+            <div class="bubble bg-danger text-white p-2 rounded">
+                <i class="fas fa-exclamation-triangle"></i> ${content}
+            </div>
+        </div>
+        `;
+    }
+
+    function resetChat() {
+        sessionStorage.removeItem('rp_history');
+        sessionStorage.removeItem('tutor_history');
+    }
+
+    function exportChat() {
+        var rp_history = JSON.parse(sessionStorage.getItem('rp_history')) || [];
+        var tutor_history = JSON.parse(sessionStorage.getItem('tutor_history')) || [];
+        // get settings from query string
+        var settings = window.location.search.substring(1).split('&');
+        var settings_dict = {};
+        for (var i = 0; i < settings.length; i++) {
+            var pair = settings[i].split('=');
+            settings_dict[pair[0]] = pair[1];
+        }
+
+        var rp_chat = '';
+        var tutor_chat = '';
+
+        for (var i = 0; i < rp_history.length; i++) {
+            rp_chat += rp_history[i].timestamp + ' ' + rp_history[i].role + ': ' + rp_history[i].content + '\n';
+        }
+
+        for (var i = 0; i < tutor_history.length; i++) {
+            tutor_chat += tutor_history[i].timestamp + ' ' + tutor_history[i].role + ': ' + tutor_history[i].content + '\n';
+        }
+
+        var rp_blob = new Blob([rp_chat], { type: "text/plain;charset=utf-8" });
+        var tutor_blob = new Blob([tutor_chat], { type: "text/plain;charset=utf-8" });
+        var settings_blob = new Blob([JSON.stringify(settings_dict)], { type: "text/plain;charset=utf-8" });
+
+        var zip = new JSZip();
+        zip.file("rp_chat.txt", rp_blob);
+        zip.file("tutor_chat.txt", tutor_blob);
+        zip.file("settings.json", settings_blob);
+
+        zip.generateAsync({ type: "blob" })
+            .then(function (content) {
+                // save with timestamp in name
+                saveAs(content, `chat_${new Date().getTime()}.zip`);
+            });
+
+    }
+
+    // Get chat config from query string
+    function sendMessage(bot, inputId, chatWindowId) {
+        var input = $('#' + inputId);
+        var message = input.val();
+        input.val('');
+
+        // Append user message to chat window
+        var chatWindow = $('#' + chatWindowId);
+        var timestamp = new Date().toLocaleTimeString();
+
+        // get history from session storage
+        var rp_history = JSON.parse(sessionStorage.getItem('rp_history')) || [];
+        var tutor_history = JSON.parse(sessionStorage.getItem('tutor_history')) || [];
+
+        if (bot == 'rp') {
+            rp_history.push({ 'timestamp': timestamp, 'role': 'user', 'content': message });
+        } else {
+            tutor_history.push({ 'timestamp': timestamp, 'role': 'user', 'content': message });
+        }
+
+        // save history to session storage
+        chatWindow.append(renderMessage('user', message, timestamp));
+        chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+
+        // Extract query parameters from the URL
+        var payload = {};
+        var queryString = window.location.search.substring(1).split('&');
+        for (var i = 0; i < queryString.length; i++) {
+            var pair = queryString[i].split('=');
+            var paramName = decodeURIComponent(pair[0]);
+            var paramValue = decodeURIComponent(pair[1]);
+            payload[paramName] = paramValue;
+        }
+
+        // Add additional parameters for API request
+        payload.bot = bot;
+        payload.rp_history = rp_history;
+        payload.tutor_history = tutor_history;
+
+        // add ... to indicate that the bot is typing
+        chatWindow.append(renderMessage('system', '...', timestamp));
+        chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+
+        // Make API call with query parameters
+        $.ajax({
+            // url: '/api/chat?bot=' + bot,
+            url: `{{ url_for("chatlang.chat") }}?bot=${bot}`,
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: 'application/json',
+            success: function (data) {
+                // Append assistant message to chat window
+                chatWindow.find('.message-system').remove();
+                if (data.rp_response) {
+                    rp_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.rp_response });
+                    sessionStorage.setItem('rp_history', JSON.stringify(rp_history));
+                    $('#rp-chat-window').append(renderMessage('assistant', data.rp_response, timestamp));
+                    // scroll to bottom of messages window under rp-chat-window
+                    $('#rp-chat-window').scrollTop($('#rp-chat-window').prop('scrollHeight'));
+                }
+                if (data.tutor_response) {
+                    tutor_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.tutor_response });
+                    sessionStorage.setItem('tutor_history', JSON.stringify(tutor_history));
+                    $('#tutor-chat-window').append(renderMessage('assistant', data.tutor_response, timestamp));
+                    // scroll to bottom of messages window
+                    $('#tutor-chat-window').scrollTop($('#tutor-chat-window').prop('scrollHeight'));
+                }
+            },
+            error: function (xhr, status, error) {
+                chatWindow.find('.message-system').remove();
+                var timestamp = new Date().toLocaleTimeString();
+                try {
+                    var errorJson = JSON.parse(xhr.responseText);
+                    chatWindow.append(renderErrorMessage(errorJson.message, timestamp));
+                } catch (e) {
+                    chatWindow.append(renderErrorMessage(xhr.responseText, timestamp));
+                }
+            }
+        });
+    }
+
+    $('#rp-input').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage('rp', 'rp-input', 'rp-chat-window');
+        }
+    });
+
+    $('#tutor-input').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage('tutor', 'tutor-input', 'tutor-chat-window');
+        }
+    });
+
+
+    // on document load, wrap tutor-card and rp-card in a divs depending on screen size
+    function updateDisplay() {
+        if ($(window).width() < 768) {
+            if (!$('#rp-tab-content').hasClass('tab-pane')) {
+                $('#rp-tab-content').addClass('tab-pane fade show active');
+                $('#tutor-tab-content').addClass('tab-pane fade');
+
+                $('#rp-tab').addClass('active');
+                $('#tutor-tab').removeClass('active');
+
+                $('#rp-tab').attr('aria-selected', 'true');
+                $('#tutor-tab').attr('aria-selected', 'false');
+            }
+        } else {
+            $('#rp-tab-content').removeClass('tab-pane fade show active');
+            $('#tutor-tab-content').removeClass('tab-pane fade show active');
+        }
+    }
+
+    $(document).ready(function () {
+        console.log('document ready');
+        resetChat();
+        updateDisplay();
+    });
+
+    // on window resize, wrap tutor-card and rp-card in a divs depending on screen size
+    $(window).resize(function () {
+        updateDisplay();
+    });
+
+</script>
+{% endblock %}

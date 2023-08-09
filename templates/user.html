@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>User Profile</h2>
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% if success_message %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ success_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<form method="post" class="row g-3">
+    {{ form.hidden_tag() }}
+    <!-- disabled form.name -->
+    <div class="col-md-6">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" value="{{ g.current_user.name }}" disabled>
+    </div>
+    <div class="col-md-6"></div>
+    <div class="col-md-6">
+        <label for="default_tutor_language" class="form-label">Default Tutor Language</label>
+        {{ form.default_tutor_language(class="form-control") }}
+    </div>
+    <div class="col-md-6">
+        <label for="api_key" class="form-label">API Key</label>
+        {{ form.api_key(class="form-control") }}
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-outline-primary w-100">Save</button>
+    </div>
+</form>
+<form method="post" action="{{ url_for('chatlang.auth0.delete_account') }}"
+    onsubmit="return confirm('Are you sure you want to delete your account?')">
+    <button type="submit" class="btn btn-outline-danger mt-3 w-100">Delete Account</button>
+</form>
+{% endblock %}
