@@ -34,14 +34,11 @@ app.config['SECRET_KEY'] = SECRET_KEY
 thisdir = pathlib.Path(__file__).parent.absolute()
 
 REDIS_URL = os.getenv("REDIS_URL")
-if REDIS_URL is None:
-    print("REDIS_URL is required for rate limiting.", file=sys.stderr)
-    sys.exit(1)
+if REDIS_URL:
+    redis_conn = Redis.from_url(REDIS_URL)
 
-redis_conn = Redis.from_url(REDIS_URL)
-
-global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global', storage_uri=REDIS_URL)
-api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'), storage_uri=REDIS_URL)
+global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global', storage_uri=REDIS_URL if REDIS_URL else None)
+api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'), storage_uri=REDIS_URL if REDIS_URL else None)
 
 # exempt users where get_api_key() != OPENAI_API_KEY
 @api_key_limiter.request_filter
@@ -174,21 +171,17 @@ def chat():
             functions = [
                 {
                     "name": "get_tutor_response",
-                    "description": " ".join([
-                        "Get the tutor's advice for the user's last message in a conversation",
-                        "The tutor corrects spelling and grammar mistakes, and provides advice on how to improve.",
-                        "If the sentence is correct, the tutor will say so."
-                    ]),
+                    "description": "Get the tutor correction and advice for the user's last message.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "correction": {
                                 "type": "string",
-                                "description": "The corrected version of the user's last message. If the user's message is correct, this is the same as the user's message."
+                                "description": "The corrected version of the user's last message. Empty string if the user's message is correct."
                             },
                             "advice": {
                                 "type": "string",
-                                "description": "The tutor's advice for the user's last message. If the user's message is correct, this is an empty string."
+                                "description": "The tutor's advice for the user's last message. Empty string if the user's message is correct."
                             }
                         },
                         "required": ["correction", "advice"],
@@ -198,13 +191,11 @@ def chat():
             messages = [
                 {
                     "role": "system",
-                    # "content": "You are a tutor monitoring a language learner's conversation with an AI assistant. Correct the learner's mistakes and provide advice (in English) on how to improve."
                     "content": (
                         f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}. "
                         f"The scenario is {scenario}. "
                         f"You are a tutor that is monitoring the AI chatbot and the user. "
-                        f"Correct the learner's mistakes and provide advice (in {tutor_language}) on how to improve."
                     )
                 },
                 {
@@ -213,11 +204,15 @@ def chat():
                         "Tutor/User conversation history:\n"
                         f"{tutor_history}\n\n"
                         "User conversation with AI assistant:\n"
-                        f"{rp_history}"
+                        f"{rp_history}\n\n"
+                        f"If the user made a mistake in their last message, "
+                        f"correct their mistake and give them advice (in their native language {tutor_language}) on how to improve. "
+                        f"If they made no mistake, give no advice (empty string)."
                     )
                 }
             ]
 
+            logging.info(f"RP correction messages: {messages}")
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
@@ -246,6 +241,7 @@ def chat():
                 *[{'role': m['role'], 'content': m['content']} for m in rp_history],
             ]
 
+            logging.info(f"RP response messages: {messages}")
             response = openai.ChatCompletion.create(model=model, messages=messages)
             response_message = response.choices[0]['message']['content']
             return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
@@ -268,6 +264,8 @@ def chat():
                     )
                 }
             ]
+
+            logging.info(f"Tutor messages: {messages}")
             tutor_user_messages = [m for m in tutor_history if m['role'] == 'user']
             tutor_assistant_messages = [m for m in tutor_history if m['role'] == 'assistant']
             for tutor_user_message in tutor_user_messages:
@@ -318,4 +316,5 @@ def about_page():
 app.register_blueprint(bp)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     app.run(debug=True, host='0.0.0.0', port=5000)
