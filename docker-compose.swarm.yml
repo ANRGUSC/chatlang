@@ -1,6 +1,6 @@
 version: '3'
 services:
-  chatlang: 
+  chatlang:
     image: jaredraycoleman/chatlang:latest
     build: .
     networks:
@@ -8,6 +8,7 @@ services:
     environment:
       - PREFIX=/chatlang
       - FLASK_ENV=production
+      - REDIS_URL=redis://redis:6379/0 # Add this line
     volumes:
       - .env:/app/.env
     command: gunicorn --bind 0.0.0.0:5000 --env FLASK_ENV=production --env PREFIX=/chatlang app:app
@@ -20,7 +21,12 @@ services:
       placement:
         constraints:
           - node.role == manager
-          
+
+  redis: # Add this service
+    image: redis:latest
+    networks:
+      - traefik_proxy
+
 networks:
   traefik_proxy:
     external: true

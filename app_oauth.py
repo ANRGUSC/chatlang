@@ -121,14 +121,18 @@ def update_app_metadata(default_tutor_language, api_key):
     }
     sub = session['profile']['sub']
     auth0_mgmt_api.users.update(session['profile']['sub'], {'app_metadata': metadata})
-    session['profile'].update(metadata)
+    session['profile']['app_metadata'] = metadata
 
 def get_app_metadata():
     # if user is not logged in, return empty dict
     if 'profile' not in session:
         return {}
+    if 'app_metadata' in session['profile']:
+        return session['profile']['app_metadata']
     auth0_mgmt_api = Auth0(AUTH0_DOMAIN, get_management_api_token())
-    return auth0_mgmt_api.users.get(session['profile']['sub']).get('app_metadata', {})
+    app_metadata = auth0_mgmt_api.users.get(session['profile']['sub']).get('app_metadata', {})
+    session['profile']['app_metadata'] = app_metadata
+    return app_metadata
 
 @auth0_bp.route('/delete_account', methods=['POST'])
 def delete_account():

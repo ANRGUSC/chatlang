@@ -10,3 +10,4 @@ auth0-python==4.4.0
 Flask-OAuthlib==0.9.6
 email-validator==2.0.0.post2
 Flask-Limiter==3.3.1
+redis==4.6.0

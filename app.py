@@ -11,12 +11,13 @@ from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import Optional as OptionalValidator
 import markdown
 import pathlib
+from redis import Redis
+import sys
 
 from flask_limiter import Limiter, RateLimitExceeded
-from flask_limiter.util import get_remote_address
 
 from app_base import app, bp
-from app_oauth import auth0_bp, requires_auth, get_app_metadata
+from app_oauth import get_app_metadata
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ORG_ID = os.environ["OPENAI_ORG_ID"]
@@ -32,8 +33,15 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 thisdir = pathlib.Path(__file__).parent.absolute()
 
-global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global')
-api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'))
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL is None:
+    print("REDIS_URL is required for rate limiting.", file=sys.stderr)
+    sys.exit(1)
+
+redis_conn = Redis.from_url(REDIS_URL)
+
+global_api_key_limiter = Limiter(app=app, key_func=lambda: 'global', storage_uri=REDIS_URL)
+api_key_limiter = Limiter(app=app, key_func=lambda: session.get('profile', {}).get('sub', '__anonymous__'), storage_uri=REDIS_URL)
 
 # exempt users where get_api_key() != OPENAI_API_KEY
 @api_key_limiter.request_filter
@@ -133,9 +141,8 @@ def index():
 
 # use default limiter for this route
 @bp.route('/api/chat', methods=['POST'])
-# @global_api_key_limiter.limit("1000 per day")
-# @api_key_limiter.limit("10 per minute;100 per day")
-@api_key_limiter.limit("1 per day")
+@global_api_key_limiter.limit("500 per day")
+@api_key_limiter.limit("20 per day")
 def chat():
     bot_type = request.args.get('bot')
 
