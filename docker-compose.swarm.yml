@@ -1,7 +1,7 @@
 version: '3'
 services:
   chatlang:
-    image: jaredraycoleman/chatlang:latest
+    image: jaredraycoleman/chatlang:v0.0.2
     build: .
     networks:
       - traefik_proxy

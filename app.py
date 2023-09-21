@@ -88,9 +88,9 @@ class ChatSettingsForm(FlaskForm):
     api_key = StringField('API Key', validators=[OptionalValidator()])
     tutor_language = StringField('Tutor Language', validators=[OptionalValidator()])
 
-def get_model() -> str:
+def get_model(api_key: str) -> str:
     model = (request.json or {}).get('api_model')
-    if model not in OUR_KEY_ALLOWED_MODELS:
+    if api_key == OPENAI_API_KEY and model not in OUR_KEY_ALLOWED_MODELS:
         raise APIException(f"Model {model} is not allowed unless you use your own API key. Check your Account Settings.", status_code=403)
     return model
 
@@ -147,8 +147,8 @@ def chat():
         raise APIException("Request must be JSON.", status_code=400)
     request_json: Dict = request.json
 
-    model = get_model()
     api_key, org_id = get_api_key()
+    model = get_model(api_key)
     tutor_language: str = get_tutor_language()
     openai.api_key = api_key
     if org_id:
@@ -191,12 +191,12 @@ def chat():
             messages = [
                 {
                     "role": "system",
-                    "content": (
-                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}. "
-                        f"The scenario is {scenario}. "
-                        f"You are a tutor that is monitoring the AI chatbot and the user. "
-                    )
+                    "content": "".join([
+                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. ", 
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}. ", 
+                        f"The scenario is {scenario}. ", 
+                        f"You are a tutor that is monitoring the AI chatbot and the user. ", 
+                    ])
                 },
                 {
                     "role": "user",
@@ -225,19 +225,19 @@ def chat():
             if function_args['advice'].strip():
                 tutor_response = f"[{function_args['correction']}] {function_args['advice']}"
 
+            system_content = "".join([
+                "You are an AI chatbot that will role-play with the user for them to practice their language skills. ",
+                f"Your role is {ai_role} and the user's role is {your_role}. ",
+                f"The scenario is {scenario}. ",
+                f"The target language is {language}. Do not use any other languages and do not break character. ",
+                f"Use {difficulty} level language. ",
+                "" if not notes_for_ai else f"Additional Info: {notes_for_ai}"
+            ])
+            logging.info(f"RP system message: {system_content}")
+
             # Role-play response
             messages = [
-                {
-                    'role': 'system', 
-                    'content': (
-                        "You are an AI chatbot that will role-play with the user for them to practice their language skills. "
-                        f"Your role is {ai_role} and the user's role is {your_role}. "
-                        f"The scenario is {scenario}. "
-                        f"The target language is {language}. Do not use any other languages and do not break character. "
-                        f"Use {difficulty} level language. "
-                        "" if not notes_for_ai else f"Notes: {notes_for_ai}"
-                    )
-                },
+                {'role': 'system', 'content': system_content},
                 *[{'role': m['role'], 'content': m['content']} for m in rp_history],
             ]
 
@@ -246,22 +246,17 @@ def chat():
             response_message = response.choices[0]['message']['content']
             return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
         else:
-            # rp_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in rp_history])
-            # tutor_convo = "\n".join([f"{ai_role if m['role'] == 'assistant' else your_role}: {m['content']}" for m in tutor_history])
-            
-            # for each user message in tutor_history, get all rp_history messages that came before it
-
             messages = [
                 {
                     'role': 'system',
-                    'content': (
-                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. "
-                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}."
-                        f"The scenario is {scenario}. "
-                        f"You are a tutor that is monitoring the AI chatbot and the user. "
-                        f"When the user asks you a question, you should answer it in their native language {tutor_language}. "
-                        f"The user may ask you questions about the conversation (i.e. what words/settings mean), how to say something in the target language, etc. "
-                    )
+                    'content': "".join([
+                        f"The user is role-playing with an AI chatbot to practice their {language} language skills. ",
+                        f"The user is playing the role of {your_role} and the AI chatbot is playing the role of {ai_role}.",
+                        f"The scenario is {scenario}. ",
+                        f"You are a tutor that is monitoring the AI chatbot and the user. ",
+                        f"When the user asks you a question, you should answer it in their native language {tutor_language}. ",
+                        f"The user may ask you questions about the conversation (i.e. what words/phrases mean), how to say something in the target language, etc. ",
+                    ])
                 }
             ]
 
@@ -296,6 +291,7 @@ def chat():
             response_message = response.choices[0]['message']['content']
             return jsonify({'tutor_response': response_message})
     except openai.error.AuthenticationError as e:
+        logging.error(f"OpenAI API key is invalid: {e}")
         raise APIException("Invalid API key. Check your account settings.", status_code=401)
     except Exception as e:
         traceback.print_exc()
