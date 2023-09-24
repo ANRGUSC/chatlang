@@ -126,11 +126,11 @@ def index():
     if form.validate_on_submit():
         query = {
             'api_model': form.api_model.data,
-            'scenario': form.scenario.data,
-            'ai_role': form.ai_role.data,
-            'your_role': form.your_role.data,
-            'language': form.language.data,
-            'difficulty': form.difficulty.data,
+            'scenario': form.scenario.data or 'Restaurant',
+            'ai_role': form.ai_role.data or 'Waiter',
+            'your_role': form.your_role.data or 'Customer',
+            'language': form.language.data or 'French',
+            'difficulty': form.difficulty.data or 'easy',
             'notes_for_ai': form.notes_for_ai.data,
         }
         return redirect(url_for('chatlang.chat_page', **query))
