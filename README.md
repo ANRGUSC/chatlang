@@ -1,6 +1,6 @@
-# Role-Play Chat for Language Learning
+# Chatlang: Role-Play Chat for Language Learning
 
-## Welcome!
+## Web App Usage
 
 Chatlang is a language learning tool that allows you to role-play different characters in a target language of your choosing.
 Unlike a traditional chatbot which offers a single window for conversation, this tool offers two side-by-side windows with different purposes.
@@ -13,65 +13,22 @@ To begin with, you will need to provide inputs in the configuration section at t
 
 ![info_form_empty](static/images/readme/info_form_empty.png)
 
-The **Notes for AI** and **API Key** fields are optional.
-
-You can fill the **Notes for AI** like "Today is your birthday", then when you start the chat, the AI knows that today is its birthday.
-
-**API Key** is required only if you don't have your local API set up. If you just want to test this out, you will need to insert your API key in here every time you restart the chat. To set-up your local API key, please refer to **Running Locally** at the bottom of the page for more instructions.
-
-Let's continue! This is just a sample.
-
-- Please use proper and rational scenario settings e.g. customer & waiter in a restaurant. Otherwise, the AI may behave strangely.
-
-![info_form_filled](static/images/readme/info_form_filled.png)
-
-Once that's done. You can find these two buttons:
-
-![header_button](static/images/readme/header_button.png)
-
-**Refresh Chat** clears the current chat history and starts a new chat under the same settings. **Start Over** allows you reset everything.
-
-Click the **Let's Go!** button, you will see the two chat windows appear. The headers show your (user) role and the AI's role in each chat window.
+The **Notes for AI** field is optional.
+You can fill the **Notes for AI** with information like "Today is your birthday", to provide the AI chatbot with extra context it can use to make the conversation more realistic.
+Once you've filled out the form, click the **New Conversation** button to start the chat.
 
 ![chat_start](static/images/readme/chat_start.png)
 
 The window on the left is for you to have the conversation in your target language, the one you are learning (e.g., Chinese).
+The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed.
+The **Reset Chat** button clears the current chat history and starts a new chat under the same settings.
+The **Export Chat Log** button exports the current chat history to a zip file.
 
-The window on the right is for you to ask questions about the conversation, clarify vocabulary/grammar, or change some context about the conversation as needed. This can be in the language you already know (e.g., English).
-
+Recall that you can ask questions in your native language on the right side of the chat window.
+See the example below:
 ![chat_1](static/images/readme/chat_1.png)
 
-As you can see above, you can chat with the AI in the setting given on the left chat window. You can stop any time if you have a question and ask it on the right window. Let's continue:
-
-![chat_2](static/images/readme/chat_2.png)
-
-![chat_3](static/images/readme/chat_3.png)
-
-As you can see above, you can change your level anytime if you feel it's too hard or too easy. There are three different levels: **Easy**, **Moderate**, and **Expert**. You can change your level with **/level [desired level]** command.
-
-You can also add notes to the chatbot on the left window as extra information. To do that, use the **/system [notes]** handle. This is an example:
-
-![chat_4](static/images/readme/chat_4.png)
-
-You can use the **/help** handle in case you forget how to use those instructions.
-
-![chat_5](static/images/readme/chat_5.png)
-
-Last but not least, you can export your chat log history any time you want by clicking the Export Chat Log button. Your log history will be converted into a .txt file with an UID prefix:
-
-The left chat log only contains the role play chat. The right chat log will contain all system instructions between the user and the system.
-
-![left_log_sample](static/images/readme/left_log_sample.png)
-
-![right_log_sample](static/images/readme/right_log_sample.png)
-
-
 ## Running Locally
-Install the requirements:
-
-```sh
-pip install -r requirements.txt
-```
 
 Set up your local API keys by copying ```.env.example``` to ```.env``` and filling in the values.
 
@@ -79,4 +36,14 @@ Set up your local API keys by copying ```.env.example``` to ```.env``` and filli
 cp .env.example .env
 ```
 
-## There you have it! We hope you like it!
+Install the requirements:
+
+```sh
+pip install -r requirements.txt
+```
+
+Or, with docker-compose:
+
+```bash
+docker compose up
+```
