@@ -123,6 +123,13 @@ messages_schema = {
 @bp.route('/', methods=['GET', 'POST'])
 def index():
     form = ChatSettingsForm()
+    form.scenario.help = "The scenario that the user and AI chatbot will role-play. For example, 'Restaurant'."
+    form.ai_role.help = "The role that the AI chatbot will play. For example, 'Waiter'."
+    form.your_role.help = "The role that the user will play. For example, 'Customer'."
+    form.language.help = "The language that the user will practice. For example, 'French'."
+    form.difficulty.help = "The difficulty of the language that the user will practice. For example, 'easy'."
+    form.api_model.help = "The OpenAI API model to use. For example, 'gpt-3.5-turbo'."
+    form.notes_for_ai.help = "Any additional information that the AI chatbot should know. For example, 'I am allergic to peanuts.'"
     if form.validate_on_submit():
         query = {
             'api_model': form.api_model.data,

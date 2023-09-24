@@ -1,6 +1,17 @@
 {% macro render_field(field, placeholder='') %}
   <div class="form-group">
-    {{ field.label }}
+    <div class="d-flex justify-content-between">
+      <label for="{{ field.id }}">{{ field.label }}</label>
+      {% if field.help %}
+        <button type="button" 
+                class="icon-button" 
+                id="help-{{ field.id }}-tooltip" 
+                data-bs-toggle="tooltip"
+                title="{{ field.help }}">
+          <i class="fas fa-question-circle"></i>
+        </button>
+      {% endif %}
+    </div>
     {{ field(class="form-control", placeholder=placeholder) }}
     {% if field.errors %}
       {% for error in field.errors %}

@@ -56,3 +56,13 @@ body {
 .grayscale {
     filter: grayscale(100%);
 }
+
+.icon-button {
+    background: none;
+    border: none;
+    color: #000;
+}
+
+.icon-button:hover {
+    color: #555555;
+}

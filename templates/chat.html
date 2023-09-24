@@ -21,7 +21,15 @@
         <div class="col-12 col-md-6 tab-pane fade show active" id="rp-tab-content" role="tabpanel"
             aria-labelledby="rp-tab">
             <div class="card" id="rp-card">
-                <div class="card-header d-none d-md-block">Conversation</div>
+                <div class="card-header d-none d-md-block">
+                    <div class="d-flex justify-content-between" id="title-conversation">
+                        Conversation
+                        <button type="button" class="icon-button" id="help-conversation-tooltip"
+                            data-bs-toggle="tooltip">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="card-body message-container justify-content-end">
                     <div class="messages" id="rp-chat-window"></div>
                 </div>
@@ -40,7 +48,14 @@
 
         <div class="col-12 col-md-6 tab-pane fade" id="tutor-tab-content" role="tabpanel" aria-labelledby="tutor-tab">
             <div class="card" id="tutor-card">
-                <div class="card-header d-none d-md-block">Tutor</div>
+                <div class="card-header d-none d-md-block">
+                    <div class="d-flex justify-content-between" id="title-tutor">
+                        Tutor
+                        <button type="button" class="icon-button" id="help-tutor-tooltip" data-bs-toggle="tooltip">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="card-body message-container justify-content-end">
                     <div class="messages" id="tutor-chat-window"></div>
                 </div>
@@ -62,8 +77,7 @@
 <!-- reset chat button by reloading the page -->
 <div class="row">
     <div class="col-12 col-md-6 mb-1">
-        <button class="btn btn-outline-dark w-100" type="button" id="button-addon-reset"
-            onclick="exportChat();">
+        <button class="btn btn-outline-dark w-100" type="button" id="button-addon-reset" onclick="exportChat();">
             Export Chat
         </button>
     </div>
@@ -79,6 +93,14 @@
 {% block scripts %}
 <script src="{{ url_for('chatlang.static', filename='js/tour-chat.js') }}"></script>
 <script>
+    // get settings from query string
+    var settings = window.location.search.substring(1).split('&');
+    var settings_dict = {};
+    for (var i = 0; i < settings.length; i++) {
+        var pair = settings[i].split('=');
+        settings_dict[pair[0]] = pair[1];
+    }
+
     function renderMessage(role, content, timestamp) {
         const background = role == 'user' ? 'bg-primary' : 'bg-light';
         const textColor = role == 'user' ? 'text-white' : 'text-dark';
@@ -109,13 +131,6 @@
     function exportChat() {
         var rp_history = JSON.parse(sessionStorage.getItem('rp_history')) || [];
         var tutor_history = JSON.parse(sessionStorage.getItem('tutor_history')) || [];
-        // get settings from query string
-        var settings = window.location.search.substring(1).split('&');
-        var settings_dict = {};
-        for (var i = 0; i < settings.length; i++) {
-            var pair = settings[i].split('=');
-            settings_dict[pair[0]] = pair[1];
-        }
 
         var rp_chat = '';
         var tutor_chat = '';
@@ -188,42 +203,114 @@
         chatWindow.append(renderMessage('system', '...', timestamp));
         chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
 
-        // Make API call with query parameters
-        $.ajax({
-            // url: '/api/chat?bot=' + bot,
-            url: `{{ url_for("chatlang.chat") }}?bot=${bot}`,
-            type: 'POST',
-            data: JSON.stringify(payload),
-            contentType: 'application/json',
-            success: function (data) {
-                // Append assistant message to chat window
+        // if (bot == 'tutor' and message starts with a slash) {
+        if (bot == 'tutor' && message.startsWith('/')) {
+            // if message is /help, show commands
+            // /set <setting> <value>
+            // /get <setting>
+            if (message == '/help') {
                 chatWindow.find('.message-system').remove();
-                if (data.rp_response) {
-                    rp_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.rp_response });
-                    sessionStorage.setItem('rp_history', JSON.stringify(rp_history));
-                    $('#rp-chat-window').append(renderMessage('assistant', data.rp_response, timestamp));
-                    // scroll to bottom of messages window under rp-chat-window
-                    $('#rp-chat-window').scrollTop($('#rp-chat-window').prop('scrollHeight'));
+                // help block
+                var help_lines = [
+                    'You can use the following commands to change settings:',
+                    '<pre>',
+                    '/set scenario <i>scenario</i>',
+                    '/set ai_role <i>role</i>',
+                    '/set your_role <i>role</i>',
+                    '/set language <i>language</i>',
+                    '/set difficulty <i>difficulty</i>',
+                    '/set api_model <i>api_model</i>',
+                    '/set notes_for_ai <i>notes</i>',
+                    '',
+                    '/get SETTING',
+                    '',
+                    '/help',
+                    '</pre>',
+                ];
+                chatWindow.append(renderMessage('assistant', help_lines.join('\n'), timestamp));
+                chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+            } else if (message.startsWith('/set')) {
+                // if message is /set, set setting
+                // /set <setting> <value>
+                var setting = message.split(' ')[1];
+                var value = message.split(' ')[2];
+                // check that setting is valid
+                if (settings_dict[setting] == undefined) {
+                    chatWindow.find('.message-system').remove();
+                    chatWindow.append(renderErrorMessage(`'${setting}' is not a valid setting. Enter /help to see valid settings.`, timestamp));
+                    chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+                } else if (setting == 'api_model' && (value != 'gpt-3.5-turbo' && value != 'gpt-4')) {
+                    chatWindow.find('.message-system').remove();
+                    chatWindow.append(renderErrorMessage(`'${setting} must be either 'gpt-3.5-turbo' or 'gpt-4'.`, timestamp));
+                    chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+                } else if (setting == 'difficulty' && (value != 'easy' && value != 'medium' && value != 'hard')) {
+                    chatWindow.find('.message-system').remove();
+                    chatWindow.append(renderErrorMessage(`'${setting} must be either 'easy', 'medium', or 'hard'.`, timestamp));
+                    chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+                } else { 
+                    settings_dict[setting] = value;
+                    setTitles();
+                    startupTooltips();
+                    chatWindow.find('.message-system').remove();
+                    chatWindow.append(renderMessage('assistant', `Set ${setting} to ${value}`, timestamp));
                 }
-                if (data.tutor_response) {
-                    tutor_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.tutor_response });
-                    sessionStorage.setItem('tutor_history', JSON.stringify(tutor_history));
-                    $('#tutor-chat-window').append(renderMessage('assistant', data.tutor_response, timestamp));
-                    // scroll to bottom of messages window
-                    $('#tutor-chat-window').scrollTop($('#tutor-chat-window').prop('scrollHeight'));
-                }
-            },
-            error: function (xhr, status, error) {
+                chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+            } else if (message.startsWith('/get')) {
+                // if message is /get, get setting
+                // /get <setting>
+                var setting = message.split(' ')[1];
+                var value = settings_dict[setting];
                 chatWindow.find('.message-system').remove();
-                var timestamp = new Date().toLocaleTimeString();
-                try {
-                    var errorJson = JSON.parse(xhr.responseText);
-                    chatWindow.append(renderErrorMessage(errorJson.message, timestamp));
-                } catch (e) {
-                    chatWindow.append(renderErrorMessage(xhr.responseText, timestamp));
+                if (value == undefined) { // not a valid setting
+                    chatWindow.append(renderErrorMessage(`'${setting}' is not a valid setting. Enter /help to see valid settings.`, timestamp));
+                } else {
+                    chatWindow.append(renderMessage('assistant', `${setting} is ${value}`, timestamp));
                 }
+                chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
+            } else {
+                // if message is not /help, /set, or /get, show error
+                chatWindow.find('.message-system').remove();
+                chatWindow.append(renderErrorMessage(`Unknown command: ${message}. Enter /help to see a list of available commands.`, timestamp));
+                chatWindow.scrollTop(chatWindow.prop('scrollHeight'));
             }
-        });
+        } else {
+            // Make API call with query parameters
+            $.ajax({
+                // url: '/api/chat?bot=' + bot,
+                url: `{{ url_for("chatlang.chat") }}?bot=${bot}`,
+                type: 'POST',
+                data: JSON.stringify(payload),
+                contentType: 'application/json',
+                success: function (data) {
+                    // Append assistant message to chat window
+                    chatWindow.find('.message-system').remove();
+                    if (data.rp_response) {
+                        rp_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.rp_response });
+                        sessionStorage.setItem('rp_history', JSON.stringify(rp_history));
+                        $('#rp-chat-window').append(renderMessage('assistant', data.rp_response, timestamp));
+                        // scroll to bottom of messages window under rp-chat-window
+                        $('#rp-chat-window').scrollTop($('#rp-chat-window').prop('scrollHeight'));
+                    }
+                    if (data.tutor_response) {
+                        tutor_history.push({ 'timestamp': timestamp, 'role': 'assistant', 'content': data.tutor_response });
+                        sessionStorage.setItem('tutor_history', JSON.stringify(tutor_history));
+                        $('#tutor-chat-window').append(renderMessage('assistant', data.tutor_response, timestamp));
+                        // scroll to bottom of messages window
+                        $('#tutor-chat-window').scrollTop($('#tutor-chat-window').prop('scrollHeight'));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    chatWindow.find('.message-system').remove();
+                    var timestamp = new Date().toLocaleTimeString();
+                    try {
+                        var errorJson = JSON.parse(xhr.responseText);
+                        chatWindow.append(renderErrorMessage(errorJson.message, timestamp));
+                    } catch (e) {
+                        chatWindow.append(renderErrorMessage(xhr.responseText, timestamp));
+                    }
+                }
+            });
+        }
     }
 
     $('#rp-input').on('keydown', function (e) {
@@ -258,10 +345,25 @@
         }
     }
 
+    function setTitles() {
+        var convo_tooltip_text = `Conversation with ${settings_dict['ai_role']}. You are playing the role of ${settings_dict['your_role']} and should speak only in ${settings_dict['language']}.`;
+        $("#help-conversation-tooltip").attr('title', convo_tooltip_text);
+        var tutor_tooltip_text = `Ask the Tutor for help by asking questions about the conversation or ${settings_dict['language']} in general. Enter the command /help to see a list of available commands`;
+        $("#help-tutor-tooltip").attr('title', tutor_tooltip_text);
+    }
+
+    function startupTooltips() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    }
+
     $(document).ready(function () {
-        console.log('document ready');
+        setTitles();
         resetChat();
         updateDisplay();
+        startupTooltips();
     });
 
     // on window resize, wrap tutor-card and rp-card in a divs depending on screen size
