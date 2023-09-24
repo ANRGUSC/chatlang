@@ -15,7 +15,15 @@ function startTour() {
             {
                 element: document.querySelector('#tutor-card'),
                 intro: "This is the tutor chat. The can help you with understand the chatbot's replies, correct your mistakes, and answer your questions. Feel free to talk to the tutor in your native language."
-            }            
+            },
+            {
+                element: document.querySelector('#button-addon-export'),
+                intro: "Click here to export the chat history."
+            },
+            {
+                element: document.querySelector('#button-addon-reset'),
+                intro: "Click here to reset the chat history."
+            }
        ]
     }).start();
 }
