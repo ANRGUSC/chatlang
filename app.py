@@ -4,6 +4,7 @@ import os
 import secrets
 import traceback
 from typing import Dict, List, Tuple, Optional
+import uuid
 from flask import redirect, render_template, request, jsonify, session, url_for
 from flask_wtf import FlaskForm
 import openai
@@ -154,6 +155,8 @@ def chat():
         raise APIException("Request must be JSON.", status_code=400)
     request_json: Dict = request.json
 
+    req_id = uuid.uuid4().hex
+
     api_key, org_id = get_api_key()
     model = get_model(api_key)
     tutor_language: str = get_tutor_language()
@@ -226,6 +229,8 @@ def chat():
                 functions=functions,
                 function_call={"name": "get_tutor_response"}
             )
+            usage = {**response["usage"], "req_id": req_id, "agent": "correction"}
+            logging.info("tokens: " + json.dumps(usage))
             response_message = response["choices"][0]["message"]
             function_args = json.loads(response_message["function_call"]["arguments"])
             tutor_response = ''
@@ -250,6 +255,8 @@ def chat():
 
             logging.info(f"RP response messages: {messages}")
             response = openai.ChatCompletion.create(model=model, messages=messages)
+            usage = {**response["usage"], "req_id": req_id, "agent": "rp"}
+            logging.info("tokens: " + json.dumps(usage))
             response_message = response.choices[0]['message']['content']
             return jsonify({'rp_response': response_message, 'tutor_response': tutor_response})
         else:
@@ -295,6 +302,8 @@ def chat():
                 
             openai.api_key = api_key
             response = openai.ChatCompletion.create(model=model, messages=messages)
+            usage = {**response["usage"], "req_id": req_id, "agent": "tutor"}
+            logging.info("tokens: " + json.dumps(usage))
             response_message = response.choices[0]['message']['content']
             return jsonify({'tutor_response': response_message})
     except openai.error.AuthenticationError as e:
