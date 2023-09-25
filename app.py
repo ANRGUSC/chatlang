@@ -237,12 +237,17 @@ def chat():
             if function_args['advice'].strip():
                 tutor_response = f"[{function_args['correction']}] {function_args['advice']}"
 
+            difficulty_prompt = {
+                "easy": "Use easy level language: *very* simple words/grammar and short one-sentence responses. ",
+                "medium": "Use medium level language: moderately simple words/grammar and short one-sentence responses. ",
+                "hard": "Use hard level language: complex words/grammar and up to 3 (but no more) sentences. ",
+            }
             system_content = "".join([
                 "You are an AI chatbot that will role-play with the user for them to practice their language skills. ",
                 f"Your role is {ai_role} and the user's role is {your_role}. ",
                 f"The scenario is {scenario}. ",
                 f"The target language is {language}. Do not use any other languages and do not break character. ",
-                f"Use {difficulty} level language. ",
+                difficulty_prompt.get(difficulty, "medium"),
                 "" if not notes_for_ai else f"Additional Info: {notes_for_ai}"
             ])
             logging.info(f"RP system message: {system_content}")
