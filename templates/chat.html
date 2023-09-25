@@ -4,16 +4,25 @@
 <div id="chat-windows" class="my-4">
     <ul class="nav nav-tabs d-md-none" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="rp-tab" data-bs-toggle="tab" data-bs-target="#rp-tab-content"
-                type="button" role="tab" aria-controls="rp-tab-content" aria-selected="true">
-                Conversation
-            </button>
+            <a class="nav-link active" id="rp-tab" data-bs-toggle="tab" data-bs-target="#rp-tab-content"
+                type="button" role="tab" aria-controls="rp-tab-content" aria-selected="true" style="display: inline;">
+                    Conversation
+                    <button type="button" class="icon-button pe-0" id="tab-help-conversation-tooltip"
+                        data-bs-toggle="tooltip"
+                        > 
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+            </a>
+            
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor-tab-content"
+            <a class="nav-link" id="tutor-tab" data-bs-toggle="tab" data-bs-target="#tutor-tab-content"
                 type="button" role="tab" aria-controls="tutor-tab-content" aria-selected="false">
                 Tutor
-            </button>
+                <button type="button" class="icon-button" id="help-tutor-tooltip" data-bs-toggle="tooltip">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </a>
         </li>
     </ul>
 
@@ -354,8 +363,10 @@
     function setTitles() {
         var convo_tooltip_text = `Conversation with ${settings_dict['ai_role']}. You are playing the role of ${settings_dict['your_role']} and should speak only in ${settings_dict['language']}.`;
         $("#help-conversation-tooltip").attr('title', convo_tooltip_text);
+        $("#tab-help-conversation-tooltip").attr('title', convo_tooltip_text);
         var tutor_tooltip_text = `Ask the Tutor for help by asking questions about the conversation or ${settings_dict['language']} in general. Enter the command /help to see a list of available commands`;
         $("#help-tutor-tooltip").attr('title', tutor_tooltip_text);
+        $("#tab-help-tutor-tooltip").attr('title', tutor_tooltip_text);
     }
 
     function startupTooltips() {
