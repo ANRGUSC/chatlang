@@ -16,6 +16,7 @@ from redis import Redis
 import sys
 
 from flask_limiter import Limiter, RateLimitExceeded
+from flask_talisman import Talisman
 
 from app_base import app, bp
 from app_oauth import get_app_metadata
@@ -29,6 +30,9 @@ FLASK_ENV = os.getenv("FLASK_ENV")
 
 if not SECRET_KEY and FLASK_ENV != "production":
     SECRET_KEY = secrets.token_urlsafe(16)
+
+if FLASK_ENV == "production":
+    Talisman(app, content_security_policy=None)
 
 app.config['SECRET_KEY'] = SECRET_KEY
 

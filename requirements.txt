@@ -11,3 +11,5 @@ Flask-OAuthlib==0.9.6
 email-validator==2.0.0.post2
 Flask-Limiter==3.3.1
 redis==4.6.0
+flask-talisman==1.0.0
+Werkzeug==2.3.7

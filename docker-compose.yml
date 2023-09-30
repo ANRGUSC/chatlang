@@ -1,7 +1,7 @@
 version: '3'
 services:
   chatlang-dev: 
-    image: jaredraycoleman/chatlang:latest
+    image: registry.digitalocean.com/kubishi-registry/chatlang:latest
     build: .
     environment:
       - PREFIX=/chatlang
