@@ -1,6 +1,6 @@
 # Chatlang: Role-Play Chat for Language Learning
 
-Use Chatlang at [chatlang.net](https://chatlang.net)
+Use Chatlang at [chatlang.net](https://chatlang.net) and read the Technical Report [here](https://anrg.usc.edu/www/papers/chatlang.pdf).
 
 ## Web App Usage
 
