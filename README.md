@@ -1,5 +1,7 @@
 # Chatlang: Role-Play Chat for Language Learning
 
+Use Chatlang at [chatlang.net](https://chatlang.net)
+
 ## Web App Usage
 
 Chatlang is a language learning tool that allows you to role-play different characters in a target language of your choosing.
