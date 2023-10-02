@@ -23,11 +23,25 @@
     </div>
     <div class="col-md-6"></div>
     <div class="col-md-6">
-        <label for="default_tutor_language" class="form-label">Default Tutor Language</label>
+        <div class="d-flex justify-content-between">
+            <label for="default_tutor_language" class="form-label">Default Tutor Language</label>
+            <button type="button" class="icon-button" id="default-language-tooltip"
+                data-bs-toggle="tooltip" data-bs-html="true"
+                title='The language you speak with the Tutor. Your native language.'>
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
         {{ form.default_tutor_language(class="form-control") }}
     </div>
     <div class="col-md-6">
-        <label for="api_key" class="form-label">API Key</label>
+        <div class="d-flex justify-content-between">
+            <label for="api_key" class="form-label">OpenAI API Key</label>
+            <button type="button" class="icon-button" id="openai-api-key-tooltip"
+                data-bs-toggle="tooltip" data-bs-html="true"
+                title='Providing an <a href="https://platform.openai.com/account/api-keys" target="blank_">OpenAI API key</a> allows you to use Chatlang without limitation.'>
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
         {{ form.api_key(class="form-control") }}
     </div>
     <div class="col-12">

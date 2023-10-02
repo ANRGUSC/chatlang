@@ -16,7 +16,7 @@ from auth0.management.auth0 import Auth0
 
 auth0_bp = Blueprint('auth0', __name__)
 
-AUTH0_CALLBACK_URL = os.getenv('AUTH0_CALLBACK_URL')
+# AUTH0_CALLBACK_URL = os.getenv('AUTH0_CALLBACK_URL')
 AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
 AUTH0_CLIENT_SECRET = os.getenv('AUTH0_CLIENT_SECRET')
 AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
@@ -51,7 +51,7 @@ def before_request():
 
 @auth0_bp.route('/login')
 def login():
-    return auth0.authorize(callback=AUTH0_CALLBACK_URL)
+    return auth0.authorize(callback=url_for('chatlang.auth0.callback_handling', _external=True))
 
 @auth0_bp.route('/callback')
 def callback_handling():

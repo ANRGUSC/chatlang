@@ -12,7 +12,11 @@
         </button>
       {% endif %}
     </div>
-    {{ field(class="form-control", placeholder=placeholder) }}
+    {% if not g.current_user %}
+      {{ field(class="form-control", placeholder=placeholder, disabled=true) }}
+    {% else %}
+      {{ field(class="form-control", placeholder=placeholder) }}
+    {% endif %}
     {% if field.errors %}
       {% for error in field.errors %}
         <span class="text-danger">{{ error }}</span>

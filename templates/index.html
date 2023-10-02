@@ -3,8 +3,31 @@
 
 {% block content %}
 <h1 class="text-center my-4">Role Play Chat Language Learning</h1>
-<p class="lead text-center">This is a demo of the Role Play Chat Language Learning system. Please fill out the form below to get started.</p>
+{% if g.current_user %}
+<p class="lead text-center">
+    Welcome, {{ g.current_user.name }}!
+</p>
+{% else %}
 
+<!-- message with inline btn-dark login button -->
+<p class="lead text-center">
+    Welcome! Please
+    <a type="button" class="btn btn-primary"
+        href="{{ url_for('chatlang.auth0.login') }}">
+        Log in
+    </a>
+    for 20 free messages*.
+</p>
+<p class="text-center text-muted">
+    *Chatlang is always free, but after 20 messages you need to provide your own 
+    <a href="https://platform.openai.com/account/api-keys" target="_blank">OpenAI API Key</a>
+    in your 
+    <a href="{{ url_for('chatlang.user') }}" target="_blank">user settings</a>
+    for unlimited use!
+</p>
+{% endif %}
+
+<!-- disable if not g.current_user-->
 <form id="settings-form" method="post">
     {{ form.hidden_tag() }}
     <div class="row">
@@ -20,17 +43,14 @@
     <div class="row">
         <div class="col-md-12">{{ render_field(form.notes_for_ai, placeholder="e.g. today is a rainy day") }}</div>
     </div>
-    <button type="submit" class="btn btn-primary w-100 mt-2" id="btn-new-conversation">New Conversation</button>
+    <button type="submit" class="btn btn-dark w-100 mt-2" id="btn-new-conversation" {% if not g.current_user %}disabled{% endif %}>
+        New Conversation
+    </button>
 </form>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('chatlang.static', filename='js/tour-index.js') }}"></script>
-
 <script>
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
 </script>
 {% endblock %}

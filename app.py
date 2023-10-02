@@ -326,6 +326,10 @@ def chat():
 def chat_page():
     return render_template('chat.html')
 
+@bp.route('/privacy', methods=['GET'])
+def privacy():
+    return render_template('privacy.html')
+
 @bp.route('/about', methods=['GET'])
 def about_page():
     markdown_path = thisdir.joinpath('README.md')
