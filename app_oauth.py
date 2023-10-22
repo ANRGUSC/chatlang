@@ -51,7 +51,10 @@ def before_request():
 
 @auth0_bp.route('/login')
 def login():
-    return auth0.authorize(callback=url_for('chatlang.auth0.callback_handling', _external=True))
+    callback_url = url_for('chatlang.auth0.callback_handling', _external=True)
+    callback_url = callback_url.replace('127.0.0.1', 'localhost') # hack for auth0
+    print(f"URL: ", url_for('chatlang.auth0.callback_handling', _external=True), flush=True)
+    return auth0.authorize(callback=callback_url)
 
 @auth0_bp.route('/callback')
 def callback_handling():

@@ -3,8 +3,8 @@ services:
   chatlang-dev: 
     image: registry.digitalocean.com/kubishi-registry/chatlang:latest
     build: .
-    environment:
-      - PREFIX=/chatlang
+    # environment:
+      # - PREFIX=/
     volumes:
       - .env:/app/.env
     ports:

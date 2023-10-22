@@ -90,8 +90,6 @@ class ChatSettingsForm(FlaskForm):
     difficulty = SelectField('Difficulty', choices=[('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')])
     api_model = SelectField('API Model', choices=[('gpt-3.5-turbo', 'gpt-3.5-turbo'), ('gpt-4', 'gpt-4')])
     notes_for_ai = TextAreaField('Notes for AI', validators=[OptionalValidator()])
-    api_key = StringField('API Key', validators=[OptionalValidator()])
-    tutor_language = StringField('Tutor Language', validators=[OptionalValidator()])
 
 def get_model(api_key: str) -> str:
     model = (request.json or {}).get('api_model')
@@ -111,7 +109,7 @@ def get_api_key() -> Tuple[str, Optional[str]]:
     return api_key, org_id
 
 def get_tutor_language() -> str:
-    return get_app_metadata().get('tutor_language') or 'English'
+    return get_app_metadata().get('default_tutor_language') or 'English'
 
 messages_schema = {
     "type": "array",
@@ -294,7 +292,7 @@ def chat():
                     'content': (
                         f"User conversation with AI assistant:\n"
                         f"{rp_convo}\n\n"
-                        f"{tutor_user_message['content']}"
+                        f"User message to you:\n{tutor_user_message['content']}"
                     )
                 })
                 
